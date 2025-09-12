@@ -34,7 +34,7 @@
             min-height: 100vh;
         }
 
-        /* Preloader Styles */
+        /* Main Preloader Styles */
         .preloader {
             position: fixed;
             top: 0;
@@ -55,18 +55,68 @@
             opacity: 0;
         }
 
+        /* BIB Verification Loading Overlay */
+        .bib-loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 8888;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+        }
+
+        .bib-loading-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .bib-loading-content {
+            background: linear-gradient(135deg, #560000ff 0%, #8b0202ff 30%, #021f6eff 70%, #00113fff 100%);
+            border-radius: 20px;
+            padding: 3rem 2rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 300px;
+            width: 90%;
+            transform: translateY(20px) scale(0.9);
+            transition: transform 0.3s ease-out;
+        }
+
+        .bib-loading-overlay.show .bib-loading-content {
+            transform: translateY(0) scale(1);
+        }
+
+        /* Logo Styles */
         .logo-container {
             position: relative;
             margin-bottom: 2rem;
         }
 
         .logo {
-            width: 120px;
-            height: 120px;
+            width: 150px;
+            height: 150px;
             opacity: 0;
             transform: translateY(50px) scale(0.8);
             animation: logoSlideUp 1.2s ease-out 0.3s forwards;
             filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.3));
+        }
+
+        .logo-small {
+            width: 60px;
+            height: 60px;
+            opacity: 0;
+            transform: scale(0.8);
+            animation: logoFadeIn 0.5s ease-out forwards;
+            filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.3));
         }
 
         .logo-glow {
@@ -82,6 +132,18 @@
             animation: glowPulse 2s ease-in-out 0.8s infinite;
         }
 
+        .logo-glow-small {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: glowPulse 2s ease-in-out infinite;
+        }
+
         .title {
             opacity: 0;
             transform: translateY(30px);
@@ -94,6 +156,19 @@
             animation: subtitleSlideUp 1s ease-out 1.2s forwards;
         }
 
+        .bib-loading-title {
+            opacity: 0;
+            transform: translateY(15px);
+            animation: titleFadeIn 0.5s ease-out 0.2s forwards;
+        }
+
+        .bib-loading-subtitle {
+            opacity: 0;
+            transform: translateY(10px);
+            animation: subtitleFadeIn 0.5s ease-out 0.4s forwards;
+        }
+
+        /* Loading Bars */
         .loading-bars {
             display: flex;
             gap: 4px;
@@ -115,6 +190,29 @@
         .loading-bar:nth-child(4) { animation-delay: 1.8s; }
         .loading-bar:nth-child(5) { animation-delay: 1.9s; }
 
+        .loading-bars-small {
+            display: flex;
+            gap: 3px;
+            margin-top: 1.5rem;
+            justify-content: center;
+        }
+
+        .loading-bar-small {
+            width: 3px;
+            height: 25px;
+            background: linear-gradient(to top, #ffffff40, #ffffff);
+            border-radius: 2px;
+            opacity: 0;
+            animation: barFadeIn 0.4s ease-out forwards, barPulse 1.5s ease-in-out infinite;
+        }
+
+        .loading-bar-small:nth-child(1) { animation-delay: 0.6s, 0.6s; }
+        .loading-bar-small:nth-child(2) { animation-delay: 0.7s, 0.7s; }
+        .loading-bar-small:nth-child(3) { animation-delay: 0.8s, 0.8s; }
+        .loading-bar-small:nth-child(4) { animation-delay: 0.9s, 0.9s; }
+        .loading-bar-small:nth-child(5) { animation-delay: 1s, 1s; }
+
+        /* Progress Bar */
         .progress-container {
             width: 200px;
             height: 2px;
@@ -135,6 +233,25 @@
             animation: progressFill 2.5s ease-out 2.2s forwards;
         }
 
+        .progress-container-small {
+            width: 150px;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 1px;
+            margin-top: 1.5rem;
+            overflow: hidden;
+            opacity: 0;
+            animation: progressFadeIn 0.5s ease-out 1.2s forwards;
+        }
+
+        .progress-bar-small {
+            height: 100%;
+            background: linear-gradient(90deg, #ffffff, #ffffff80);
+            border-radius: 1px;
+            width: 0%;
+            animation: progressFillSmall 2s ease-out 1.4s forwards;
+        }
+
         .loading-text {
             margin-top: 1.5rem;
             color: white;
@@ -145,7 +262,17 @@
             animation: textSlideUp 0.8s ease-out 2.4s forwards;
         }
 
-        /* Animations */
+        .loading-text-small {
+            margin-top: 1rem;
+            color: white;
+            font-size: 0.8rem;
+            font-weight: 500;
+            opacity: 0;
+            transform: translateY(10px);
+            animation: textFadeIn 0.5s ease-out 1.6s forwards;
+        }
+
+        /* Animations for Main Preloader */
         @keyframes logoSlideUp {
             to {
                 opacity: 1;
@@ -202,6 +329,69 @@
             }
         }
 
+        /* Animations for BIB Loading */
+        @keyframes logoFadeIn {
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes titleFadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes subtitleFadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes barFadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes barPulse {
+            0%, 100% { transform: scaleY(1); opacity: 0.7; }
+            50% { transform: scaleY(1.5); opacity: 1; }
+        }
+
+        @keyframes progressFadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes progressFillSmall {
+            to {
+                width: 100%;
+            }
+        }
+
+        @keyframes textFadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Spinning animation for verification icon */
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .spin {
+            animation: spin 1s linear infinite;
+        }
+
         .main-content {
             opacity: 0;
             transform: translateY(30px);
@@ -215,7 +405,7 @@
     </style>
 </head>
 <body class="min-h-screen py-6 sm:py-8">
-    <!-- Preloader -->
+    <!-- Main Preloader -->
     <div id="preloader" class="preloader">
         <div class="logo-container">
             <div class="logo-glow"></div>
@@ -244,6 +434,36 @@
         
         <div class="loading-text">
             Memuat halaman pendaftaran...
+        </div>
+    </div>
+
+    <!-- BIB Verification Loading Overlay -->
+    <div id="bib-loading-overlay" class="bib-loading-overlay">
+        <div class="bib-loading-content">
+            <div class="logo-container">
+                <div class="logo-glow-small"></div>
+                <img src="{{ asset('images/bayanrun.png') }}" alt="Bayan Run 2025" class="logo-medium object-contain mx-auto">
+            </div>
+            
+            <h3 class="bib-loading-title text-lg font-bold text-white">
+                Memverifikasi BIB
+            </h3>
+            
+            <p class="bib-loading-subtitle text-white text-sm font-medium mt-2">
+                Mohon tunggu sebentar...
+            </p>
+            
+            <div class="loading-bars-small">
+                <div class="loading-bar-small"></div>
+                <div class="loading-bar-small"></div>
+                <div class="loading-bar-small"></div>
+                <div class="loading-bar-small"></div>
+                <div class="loading-bar-small"></div>
+            </div>
+            
+            <div class="loading-text-small">
+                Validasi data peserta...
+            </div>
         </div>
     </div>
 
@@ -500,9 +720,9 @@
                 </div>
                 
                 <button onclick="resetForm()" 
-                        class="w-full sm:w-auto bg-yellow-800 to-red-500 hover:from-blue-700 hover:to-red-600 text-white font-semibold py-3 px-8 rounded-lg transition-all duration-300 transform hover:scale-105">
-                    <span class="inline-block mr-2">➕</span>
-                    Daftar Peserta Baru
+                        id="btn-reset"
+                        class="w-full sm:w-auto bg-yellow-500 to-red-500 hover:from-blue-700 hover:to-red-600 text-white font-semibold py-3 px-8 rounded-lg transition-all duration-300 transform hover:scale-105">
+                    Selesai
                 </button>
             </div>
 
@@ -532,6 +752,43 @@
             }, 4500);
         });
 
+        // Show BIB Loading Overlay
+        function showBibLoading() {
+            const overlay = document.getElementById('bib-loading-overlay');
+            overlay.classList.add('show');
+        }
+
+        // Hide BIB Loading Overlay
+        function hideBibLoading() {
+            const overlay = document.getElementById('bib-loading-overlay');
+            overlay.classList.remove('show');
+        }
+
+        // Show main preloader for reset
+        function showMainPreloader() {
+            const preloader = document.getElementById('preloader');
+            const mainContent = document.getElementById('main-content');
+            
+            // Reset preloader animations
+            preloader.style.display = 'flex';
+            preloader.classList.remove('fade-out');
+            mainContent.classList.remove('show');
+            
+            // Hide main content immediately
+            mainContent.style.opacity = '0';
+            mainContent.style.transform = 'translateY(30px)';
+            
+            // Show preloader for shorter duration on reset
+            setTimeout(function() {
+                preloader.classList.add('fade-out');
+                
+                setTimeout(function() {
+                    preloader.style.display = 'none';
+                    mainContent.classList.add('show');
+                }, 800);
+            }, 2500); // Shorter duration for reset
+        }
+
         // BIB verification handler
         document.getElementById('bib-form').addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -549,8 +806,11 @@
             const btnVerifyText = document.getElementById('btn-verify-text');
             const originalText = btnVerifyText.innerHTML;
             
+            // Show loading overlay
+            showBibLoading();
+            
             btnVerify.disabled = true;
-            btnVerifyText.innerHTML = '<span class="inline-block mr-2">⏳</span>Memverifikasi...';
+            btnVerifyText.innerHTML = '<span class="inline-block mr-2 spin">🔍</span>Memverifikasi...';
 
             try {
                 const response = await fetch('/verify-bib', {
@@ -565,15 +825,21 @@
 
                 const result = await response.json();
 
+                // Add minimum loading time for better UX
+                await new Promise(resolve => setTimeout(resolve, 1500));
+
                 if (result.success) {
                     currentPesertaData = result.data;
+                    hideBibLoading();
                     showRegistrationForm(result.data);
                 } else {
+                    hideBibLoading();
                     showError('nomor_bib', result.message || 'Nomor BIB tidak ditemukan');
                 }
 
             } catch (error) {
                 console.error('Error:', error);
+                hideBibLoading();
                 showError('nomor_bib', 'Terjadi kesalahan saat memverifikasi BIB. Silakan coba lagi.');
             } finally {
                 btnVerify.disabled = false;
@@ -604,7 +870,7 @@
             const originalText = btnText.innerHTML;
             
             btnDaftar.disabled = true;
-            btnText.innerHTML = '<span class="inline-block mr-2">⏳</span>Mendaftar...';
+            btnText.innerHTML = '<span class="inline-block mr-2 spin">🚀</span>Mendaftar...';
 
             try {
                 const response = await fetch('/daftar', {
@@ -729,18 +995,24 @@
         }
 
         function resetForm() {
-            document.getElementById('bib-form').reset();
-            document.getElementById('pendaftaran-form').reset();
-            clearErrors();
+            // Show preloader with reset functionality
+            showMainPreloader();
             
-            document.getElementById('success-message').classList.add('hidden');
-            document.getElementById('form-pendaftaran').classList.add('hidden');
-            document.getElementById('bib-verification').classList.remove('hidden');
-            
-            document.getElementById('qr-preview').classList.add('hidden');
-            currentPesertaData = null;
-            
-            window.scrollTo(0, 0);
+            // Clear form data after a short delay
+            setTimeout(function() {
+                document.getElementById('bib-form').reset();
+                document.getElementById('pendaftaran-form').reset();
+                clearErrors();
+                
+                document.getElementById('success-message').classList.add('hidden');
+                document.getElementById('form-pendaftaran').classList.add('hidden');
+                document.getElementById('bib-verification').classList.remove('hidden');
+                
+                document.getElementById('qr-preview').classList.add('hidden');
+                currentPesertaData = null;
+                
+                window.scrollTo(0, 0);
+            }, 500);
         }
 
         // Auto-format phone number
@@ -785,6 +1057,28 @@
                     document.getElementById('error-' + this.id).classList.add('hidden');
                 }
             });
+        });
+
+        // Prevent double-click on buttons
+        document.getElementById('btn-verify').addEventListener('click', function() {
+            this.style.pointerEvents = 'none';
+            setTimeout(() => {
+                this.style.pointerEvents = 'auto';
+            }, 2000);
+        });
+
+        document.getElementById('btn-daftar').addEventListener('click', function() {
+            this.style.pointerEvents = 'none';
+            setTimeout(() => {
+                this.style.pointerEvents = 'auto';
+            }, 2000);
+        });
+
+        document.getElementById('btn-complete').addEventListener('click', function() {
+            this.style.pointerEvents = 'none';
+            setTimeout(() => {
+                this.style.pointerEvents = 'auto';
+            }, 1000);
         });
     </script>
 </body>
