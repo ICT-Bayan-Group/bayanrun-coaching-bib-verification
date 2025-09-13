@@ -55,6 +55,28 @@
             opacity: 0;
         }
 
+        /* Thank You Page Preloader */
+        .thankyou-preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: linear-gradient(135deg, #560000ff 0%, #8b0202ff 30%, #021f6eff 70%, #00113fff 100%);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 0;
+            transition: opacity 0.8s ease-in-out;
+        }
+
+        .thankyou-preloader.show {
+            display: flex;
+            opacity: 1;
+        }
+
         /* BIB Verification Loading Overlay */
         .bib-loading-overlay {
             position: fixed;
@@ -93,6 +115,93 @@
 
         .bib-loading-overlay.show .bib-loading-content {
             transform: translateY(0) scale(1);
+        }
+
+        /* Thank You Content Styles */
+        .thankyou-content {
+            text-align: center;
+            max-width: 600px;
+            padding: 2rem;
+            opacity: 0;
+            transform: translateY(50px) scale(0.9);
+            animation: thankYouSlideUp 1.5s ease-out 0.5s forwards;
+        }
+
+        .thankyou-logo {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 2rem;
+            opacity: 0;
+            transform: translateY(30px) scale(0.8);
+            animation: logoSlideUp 1.2s ease-out 0.2s forwards;
+            filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.4));
+        }
+
+        .thankyou-title {
+            color: white;
+            font-size: 2.5rem;
+            font-weight: 800;
+            font-style: italic;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            margin-bottom: 1rem;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: titleSlideUp 1s ease-out 1s forwards;
+        }
+
+        .thankyou-message {
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+            line-height: 1.8;
+            margin-bottom: 2rem;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: messageSlideUp 1s ease-out 1.3s forwards;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .thankyou-location {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 1.5rem;
+            color: white;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            opacity: 0;
+            transform: translateY(20px) scale(0.95);
+            animation: locationSlideUp 1s ease-out 1.6s forwards;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .thankyou-sparkles {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            opacity: 0;
+            animation: sparklesSlideUp 1s ease-out 1.9s forwards;
+        }
+
+        .sparkle {
+            font-size: 2rem;
+            animation: sparkle 2s ease-in-out infinite;
+        }
+
+        .sparkle:nth-child(1) { animation-delay: 0s; }
+        .sparkle:nth-child(2) { animation-delay: 0.5s; }
+        .sparkle:nth-child(3) { animation-delay: 1s; }
+        .sparkle:nth-child(4) { animation-delay: 1.5s; }
+
+        .thankyou-footer {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+            font-weight: 500;
+            opacity: 0;
+            transform: translateY(15px);
+            animation: footerSlideUp 1s ease-out 2.2s forwards;
         }
 
         /* Logo Styles */
@@ -381,6 +490,52 @@
             }
         }
 
+        /* Thank You Page Animations */
+        @keyframes thankYouSlideUp {
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes messageSlideUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes locationSlideUp {
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes sparklesSlideUp {
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes footerSlideUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes sparkle {
+            0%, 100% { 
+                transform: scale(1) rotate(0deg);
+                opacity: 0.7;
+            }
+            50% { 
+                transform: scale(1.3) rotate(180deg);
+                opacity: 1;
+            }
+        }
+
         /* Spinning animation for verification icon */
         @keyframes spin {
             to {
@@ -401,6 +556,26 @@
         .main-content.show {
             opacity: 1;
             transform: translateY(0);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 640px) {
+            .thankyou-title {
+                font-size: 2rem;
+            }
+            
+            .thankyou-message {
+                font-size: 1rem;
+            }
+            
+            .thankyou-logo {
+                width: 100px;
+                height: 100px;
+            }
+            
+            .thankyou-content {
+                padding: 1rem;
+            }
         }
     </style>
 </head>
@@ -437,12 +612,36 @@
         </div>
     </div>
 
+    <!-- Thank You Preloader -->
+    <div id="thankyou-preloader" class="thankyou-preloader">
+        <div class="thankyou-content">
+            <img src="{{ asset('images/bayanrun.png') }}" alt="Bayan Run 2025" class="thankyou-logo object-contain">
+            
+            <h1 class="thankyou-title">
+                TERIMA KASIH!
+            </h1>
+            
+            <p class="thankyou-message">
+                Terima kasih telah melakukan registrasi<br>
+                <strong>Coaching Clinic Bayan Run 2025</strong>
+            </p>
+            
+            <div class="thankyou-location">
+                <div class="text-lg font-bold mb-2">📍 Sampai Bertemu Di</div>
+                <div class="text-base">
+                    <strong>Gedung Kesenian Balikpapan</strong><br>
+                    Kalimantan Timur, Indonesia
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- BIB Verification Loading Overlay -->
     <div id="bib-loading-overlay" class="bib-loading-overlay">
         <div class="bib-loading-content">
             <div class="logo-container">
                 <div class="logo-glow-small"></div>
-                <img src="{{ asset('images/bayanrun.png') }}" alt="Bayan Run 2025" class="logo-medium object-contain mx-auto">
+                <img src="{{ asset('images/bayanrun.png') }}" alt="Bayan Run 2025" class="logo-small object-contain mx-auto">
             </div>
             
             <h3 class="bib-loading-title text-lg font-bold text-white">
@@ -719,7 +918,7 @@
                     </div>
                 </div>
                 
-                <button onclick="resetForm()" 
+                <button onclick="showThankYou()" 
                         id="btn-reset"
                         class="w-full sm:w-auto bg-yellow-500 to-red-500 hover:from-blue-700 hover:to-red-600 text-white font-semibold py-3 px-8 rounded-lg transition-all duration-300 transform hover:scale-105">
                     Selesai
@@ -751,6 +950,45 @@
                 }, 800);
             }, 4500);
         });
+
+        // Show Thank You Page
+        function showThankYou() {
+            const mainContent = document.getElementById('main-content');
+            const thankYouPreloader = document.getElementById('thankyou-preloader');
+            
+            // Hide main content with fade out effect
+            mainContent.classList.remove('show');
+            
+            setTimeout(function() {
+                mainContent.style.display = 'none';
+                thankYouPreloader.classList.add('show');
+                
+                // Auto hide thank you page after 8 seconds and reset form
+                setTimeout(function() {
+                    thankYouPreloader.classList.remove('show');
+                    
+                    setTimeout(function() {
+                        // Reset all forms and show initial state
+                        document.getElementById('bib-form').reset();
+                        document.getElementById('pendaftaran-form').reset();
+                        clearErrors();
+                        
+                        document.getElementById('success-message').classList.add('hidden');
+                        document.getElementById('form-pendaftaran').classList.add('hidden');
+                        document.getElementById('bib-verification').classList.remove('hidden');
+                        
+                        document.getElementById('qr-preview').classList.add('hidden');
+                        currentPesertaData = null;
+                        
+                        // Show main content again
+                        mainContent.style.display = 'block';
+                        mainContent.classList.add('show');
+                        
+                        window.scrollTo(0, 0);
+                    }, 800);
+                }, 8000);
+            }, 300);
+        }
 
         // Show BIB Loading Overlay
         function showBibLoading() {
@@ -1074,7 +1312,7 @@
             }, 2000);
         });
 
-        document.getElementById('btn-complete').addEventListener('click', function() {
+        document.getElementById('btn-reset').addEventListener('click', function() {
             this.style.pointerEvents = 'none';
             setTimeout(() => {
                 this.style.pointerEvents = 'auto';
