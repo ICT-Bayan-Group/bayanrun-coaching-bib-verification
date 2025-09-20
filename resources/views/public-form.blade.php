@@ -674,10 +674,10 @@
                <img src="{{ asset('images/bayanrun.png') }}" 
                     alt="Bayan Run 2025" 
                     class="mx-auto w-34 h-36 sm:w-34 sm:h-36 object-contain">
-                <h1 class="mt-3 sm:mt-4 text-3xl sm:text-5xl font-extrabold text-white italic tracking-wide drop-shadow-sm">
-                    BAYAN RUN 2025 
+                <h1 class="mt-4 sm:mt-5 text-2xl sm:text-3xl font-extrabold text-white italic tracking-wide drop-shadow-sm">
+                    COACHING CLINIC REGISTRATION
                 </h1>
-                <p class="text-white font-bold mt-1 sm:mt-2 text-sm sm:text-base uppercase">Formulir Pendaftaran Coaching Clinic</p>
+                <p class="text-white font-bold mt-1 sm:mt-2 text-sm sm:text-xl uppercase">BAYAN RUN 2025</p>
             </div>
 
             <!-- BIB Verification Form -->
@@ -864,8 +864,8 @@
                 <div class="text-green-600 text-6xl mb-4">✅</div>
                 <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-4">Pendaftaran Berhasil!</h2>
                 <p class="text-gray-600 mb-6 text-sm sm:text-base font-semibold">
-                    Pendaftaran Anda berhasil! Terima kasih sudah mendaftar pada coaching clinic ini. 
-                    Detail pendaftaran sudah kami kirimkan melalui WhatsApp.
+                   Hasil pendaftaran beserta QR Code registrasi akan menjadi bukti resmi untuk memasuki area acara saat hari pelaksanaan.
+                    Mohon simpan dan tunjukkan QR Code Anda di pintu masuk.
                 </p>
                 
                 <!-- Peserta Info -->
