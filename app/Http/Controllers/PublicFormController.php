@@ -149,19 +149,21 @@ class PublicFormController extends Controller
      */
     private function processQRCode($peserta)
     {
-        $qrData = json_encode([
-            'id' => $peserta->id,
-            'bib' => $peserta->nomor_bib,
-            'nama' => $peserta->nama_lengkap,
-            'kategori' => $peserta->kategori_lari,
-            'token' => $peserta->qr_token
-        ]);
+        // Format nama untuk URL (replace spasi dengan underscore)
+        $namaFormatted = str_replace(' ', '_', $peserta->nama_lengkap);
+        
+        // Buat URL dengan format yang diinginkan
+        $qrUrl = "https://coaching.bayanevent.com/verify.html?nomor=" . $peserta->nomor_bib 
+               . "#" . $namaFormatted;
 
-        $qrCodeUrl = $this->generateQRCodeURL($qrData);
+        $qrCodeUrl = $this->generateQRCodeURL($qrUrl);
         $qrCodePath = $this->downloadAndSaveQRCode($qrCodeUrl, $peserta->id);
         
         if ($qrCodePath) {
-            $peserta->update(['qr_code_path' => $qrCodePath]);
+            $peserta->update([
+                'qr_code_path' => $qrCodePath,
+                'qr_url' => $qrUrl // Simpan URL yang di-encode di QR
+            ]);
         }
 
         return $qrCodeUrl;
@@ -253,6 +255,55 @@ class PublicFormController extends Controller
         }
 
         return null;
+    }
+
+    // ===============================
+    // QR CODE VERIFICATION METHODS
+    // ===============================
+
+    /**
+     * Verifikasi QR Code (simplified - hanya menampilkan info peserta)
+     */
+    public function verifyQR(Request $request)
+    {
+        $nomor = $request->input('nomor');
+
+        try {
+            $peserta = PesertaLari::where('nomor_bib', $nomor)->first();
+            
+            if (!$peserta) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Nomor BIB tidak ditemukan dalam database'
+                ], 404);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Data peserta berhasil ditemukan',
+                'data' => [
+                    'id' => $peserta->id,
+                    'nama' => $peserta->nama_lengkap,
+                    'nomor_bib' => $peserta->nomor_bib,
+                    'kategori' => $peserta->kategori_lari,
+                    'email' => $peserta->email,
+                    'telepon' => $peserta->telepon,
+                    'waktu_daftar' => $peserta->created_at->format('d/m/Y H:i:s'),
+                    'status' => $peserta->status
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('QR Code verification error', [
+                'nomor' => $nomor,
+                'error' => $e->getMessage()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat memverifikasi QR Code'
+            ], 500);
+        }
     }
 
     // ===============================
@@ -663,7 +714,7 @@ class PublicFormController extends Controller
                "📝 BIB: {$peserta->nomor_bib}\n" .
                "👤 Nama: {$peserta->nama_lengkap}\n" .
                "🏃‍♂️ Kategori: {$peserta->kategori_lari}\n\n" .
-               "⚠️ Simpan QR Code ini untuk check-in event!";
+               "⚠️ Simpan QR Code ini untuk verifikasi peserta!";
     }
 
     /**
@@ -673,14 +724,15 @@ class PublicFormController extends Controller
     {
         return "🚨 QR CODE FALLBACK 🚨\n\n" .
                "Maaf, terjadi kendala teknis dalam mengirim QR Code sebagai gambar.\n\n" .
-               "📋 DATA QR CODE ANDA:\n" .
+               "📋 DATA VERIFIKASI ANDA:\n" .
                "━━━━━━━━━━━━━━━━━━━━━━━━━\n" .
                "🎫 BIB: {$peserta->nomor_bib}\n" .
                "👤 Nama: {$peserta->nama_lengkap}\n" .
                "🏆 Kategori: {$peserta->kategori_lari}\n" .
-               "🔐 Token: {$peserta->qr_token}\n" .
                "━━━━━━━━━━━━━━━━━━━━━━━━━\n\n" .
-               "📱 Anda dapat menggunakan data di atas untuk verifikasi manual saat check-in.\n\n" .
+               "📱 Link verifikasi:\n" .
+               "https://coaching.bayanevent.com/verify.html?nomor={$peserta->nomor_bib}#" . str_replace(' ', '_', $peserta->nama_lengkap) . "\n\n" .
+               "📱 Anda dapat menggunakan link di atas untuk verifikasi.\n\n" .
                "🔄 QR Code gambar akan dikirim ulang secepatnya.";
     }
 
@@ -753,15 +805,12 @@ class PublicFormController extends Controller
                 'nama' => $peserta->nama_lengkap
             ]);
             
-            $qrData = json_encode([
-                'id' => $peserta->id,
-                'bib' => $peserta->nomor_bib,
-                'nama' => $peserta->nama_lengkap,
-                'kategori' => $peserta->kategori_lari,
-                'token' => $peserta->qr_token
-            ]);
+            // Generate QR dengan format URL baru
+            $namaFormatted = str_replace(' ', '_', $peserta->nama_lengkap);
+            $qrUrl = "https://coaching.bayanevent.com/verify.html?nomor=" . $peserta->nomor_bib 
+                   . "#" . $namaFormatted;
 
-            $qrCodeUrl = $this->generateQRCodeURL($qrData);
+            $qrCodeUrl = $this->generateQRCodeURL($qrUrl);
             $phoneNumber = $this->formatPhoneNumber($peserta->telepon);
             
             $imageResult = $this->sendWhatsAppImage($phoneNumber, $qrCodeUrl, $peserta);
@@ -804,32 +853,6 @@ class PublicFormController extends Controller
     }
 
     /**
-     * Verifikasi QR Code
-     */
-    public function verifyQR($token)
-    {
-        $peserta = PesertaLari::where('qr_token', $token)->first();
-        
-        if (!$peserta) {
-            return response()->json([
-                'success' => false,
-                'message' => 'QR Code tidak valid'
-            ], 404);
-        }
-
-        return response()->json([
-            'success' => true,
-            'data' => [
-                'id' => $peserta->id,
-                'nama' => $peserta->nama_lengkap,
-                'kategori' => $peserta->kategori_lari,
-                'status' => $peserta->status,
-                'waktu_daftar' => $peserta->created_at->format('d/m/Y H:i')
-            ]
-        ]);
-    }
-
-    /**
      * Export data ke Excel/CSV
      */
     public function export(Request $request)
@@ -863,7 +886,6 @@ class PublicFormController extends Controller
         ]);
     }
 
-    // Duplicate method removed: downloadAndSaveQRCode
     /**
      * Regenerate QR Code untuk peserta tertentu
      */
@@ -872,22 +894,28 @@ class PublicFormController extends Controller
         try {
             $peserta = PesertaLari::findOrFail($id);
             
-            $qrData = json_encode([
-                'id' => $peserta->id,
-                'nama' => $peserta->nama_lengkap,
-                'kategori' => $peserta->kategori_lari,
-                'token' => $peserta->qr_token
-            ]);
+            // Format nama untuk URL
+            $namaFormatted = str_replace(' ', '_', $peserta->nama_lengkap);
+            
+            // Buat URL dengan format baru
+            $qrUrl = "https://coaching.bayanevent.com/verify.html?nomor=" . $peserta->nomor_bib 
+                   . "#" . $namaFormatted;
 
-            $qrCodeUrl = $this->generateQRCodeURL($qrData);
+            $qrCodeUrl = $this->generateQRCodeURL($qrUrl);
             $qrCodePath = $this->downloadAndSaveQRCode($qrCodeUrl, $peserta->id);
             
-            $peserta->update(['qr_code_path' => $qrCodePath]);
+            $peserta->update([
+                'qr_code_path' => $qrCodePath,
+                'qr_url' => $qrUrl
+            ]);
 
             return response()->json([
                 'success' => true,
                 'message' => 'QR Code berhasil di-generate ulang',
-                'qr_code_url' => $qrCodeUrl
+                'data' => [
+                    'qr_code_url' => $qrCodeUrl,
+                    'qr_url' => $qrUrl
+                ]
             ]);
 
         } catch (\Exception $e) {
@@ -897,4 +925,5 @@ class PublicFormController extends Controller
             ], 500);
         }
     }
+
 }
