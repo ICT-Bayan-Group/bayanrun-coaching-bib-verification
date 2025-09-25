@@ -12,6 +12,9 @@ use Illuminate\Support\Str;
 
 class PublicFormController extends Controller
 {
+    // Maximum allowed registrations
+    private const MAX_REGISTRATIONS = 600;
+
     // ===============================
     // PUBLIC FORM METHODS
     // ===============================
@@ -21,60 +24,75 @@ class PublicFormController extends Controller
      */
     public function index()
     {
-        return view('public-form');
+        // Check if registration is still open
+        $totalRegistrations = PesertaLari::count();
+        $registrationOpen = $totalRegistrations < self::MAX_REGISTRATIONS;
+        
+        return view('public-form', compact('registrationOpen', 'totalRegistrations'));
     }
 
     /**
-     * Verifikasi nomor BIB
+     * Verifikasi Email
      */
-    public function verifyBib(Request $request)
+    public function verifyEmail(Request $request)
     {
+        // Check registration limit first
+        $totalRegistrations = PesertaLari::count();
+        if ($totalRegistrations >= self::MAX_REGISTRATIONS) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Maaf, pendaftaran sudah ditutup. Batas maksimal 600 peserta telah tercapai.'
+            ], 422);
+        }
+
         $validated = $request->validate([
-            'nomor_bib' => 'required|string'
+            'email' => 'required|string|email'
         ], [
-            'nomor_bib.required' => 'Nomor BIB harus diisi'
+            'email.required' => 'Email harus diisi',
+            'email.email' => 'Format email tidak valid'
         ]);
 
         try {
-            $peserta = PesertaPreRegistered::findByBib($validated['nomor_bib']);
-            
+            $peserta = PesertaPreRegistered::findByEmail($validated['email']);
+
             if (!$peserta) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Nomor BIB tidak ditemukan. Pastikan nomor BIB yang Anda masukkan benar.'
+                    'message' => 'Email tidak ditemukan. Pastikan email yang Anda masukkan benar.'
                 ], 404);
             }
 
-            $sudahTerdaftar = PesertaLari::where('nomor_bib', $validated['nomor_bib'])->exists();
-            
+            $sudahTerdaftar = PesertaLari::where('email', $validated['email'])->exists();
+
             if ($sudahTerdaftar) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Nomor BIB ini sudah terdaftar sebelumnya. Setiap BIB hanya dapat mendaftar satu kali.'
+                    'message' => 'Email ini sudah terdaftar sebelumnya. Setiap email hanya dapat mendaftar satu kali.'
                 ], 422);
             }
 
             return response()->json([
                 'success' => true,
-                'message' => 'BIB berhasil diverifikasi',
+                'message' => 'Email berhasil diverifikasi',
                 'data' => [
+                    'email' => $peserta->email,
                     'nomor_bib' => $peserta->nomor_bib,
                     'nama' => $peserta->nama,
                     'kategori_lari' => $peserta->kategori_lari,
-                    'email' => $peserta->email,
-                    'nomor_telepon' => $peserta->nomor_telepon
+                    'nomor_telepon' => $peserta->nomor_telepon,
+                    'remaining_slots' => self::MAX_REGISTRATIONS - $totalRegistrations
                 ]
             ]);
 
         } catch (\Exception $e) {
-            Log::error('BIB verification error', [
-                'nomor_bib' => $validated['nomor_bib'],
+            Log::error('Email verification error', [
+                'email' => $validated['email'],
                 'error' => $e->getMessage()
             ]);
             
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan saat memverifikasi BIB. Silakan coba lagi.'
+                'message' => 'Terjadi kesalahan saat memverifikasi Email. Silakan coba lagi.'
             ], 500);
         }
     }
@@ -89,17 +107,28 @@ class PublicFormController extends Controller
         try {
             DB::beginTransaction();
 
-            // Verifikasi BIB
-            $preRegistered = PesertaPreRegistered::findByBib($validated['nomor_bib']);
-            if (!$preRegistered) {
+            // Double check registration limit in transaction
+            $totalRegistrations = PesertaLari::count();
+            if ($totalRegistrations >= self::MAX_REGISTRATIONS) {
+                DB::rollBack();
                 return response()->json([
                     'success' => false,
-                    'message' => 'Nomor BIB tidak valid atau tidak ditemukan dalam database.'
+                    'message' => 'Maaf, pendaftaran sudah ditutup. Batas maksimal 600 peserta telah tercapai.'
+                ], 422);
+            }
+
+            // Verifikasi Email
+            $preRegistered = PesertaPreRegistered::findByEmail($validated['email']);
+            if (!$preRegistered) {
+                DB::rollBack();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Email tidak valid atau tidak ditemukan dalam database.'
                 ], 404);
             }
 
             // Buat peserta baru
-            $peserta = $this->createPeserta($validated);
+            $peserta = $this->createPeserta($validated, $preRegistered);
             
             // Generate dan simpan QR Code
             $qrCodeUrl = $this->processQRCode($peserta);
@@ -109,20 +138,24 @@ class PublicFormController extends Controller
 
             DB::commit();
 
-            // Kirim WhatsApp notification
-            $whatsappResult = $this->sendWhatsAppNotification($peserta, $qrCodeUrl);
+            // Kirim WhatsApp notification dengan urutan: QR Code dahulu, kemudian message
+            $whatsappResult = $this->sendWhatsAppNotificationNewOrder($peserta, $qrCodeUrl);
+
+            // Calculate remaining slots
+            $remainingSlots = self::MAX_REGISTRATIONS - PesertaLari::count();
 
             return response()->json([
                 'success' => true,
-                'message' => 'Pendaftaran Anda berhasil! Detail pendaftaran sudah kami kirimkan melalui WhatsApp.',
+                'message' => 'Pendaftaran Anda berhasil! QR Code dan detail pendaftaran sudah kami kirimkan melalui WhatsApp.',
                 'data' => [
                     'id' => $peserta->id,
-                    'nomor_bib' => $peserta->nomor_bib,
                     'nama' => $peserta->nama_lengkap,
                     'kategori' => $peserta->kategori_lari,
                     'qr_code_url' => $qrCodeUrl,
                     'whatsapp_sent' => $whatsappResult['success'] ?? false,
-                    'whatsapp_message' => $whatsappResult['message'] ?? 'Unknown status'
+                    'whatsapp_message' => $whatsappResult['message'] ?? 'Unknown status',
+                    'remaining_slots' => $remainingSlots,
+                    'registration_number' => PesertaLari::count()
                 ]
             ]);
 
@@ -152,8 +185,8 @@ class PublicFormController extends Controller
         // Format nama untuk URL (replace spasi dengan underscore)
         $namaFormatted = str_replace(' ', '_', $peserta->nama_lengkap);
         
-        // Buat URL dengan format yang diinginkan
-        $qrUrl = "https://coaching.bayanevent.com/verify.html?nomor=" . $peserta->nomor_bib 
+        // Buat URL dengan format yang diinginkan - MENGGUNAKAN EMAIL
+        $qrUrl = "https://coaching.bayanevent.com/verify?email=" . urlencode($peserta->email) 
                . "#" . $namaFormatted;
 
         $qrCodeUrl = $this->generateQRCodeURL($qrUrl);
@@ -262,19 +295,19 @@ class PublicFormController extends Controller
     // ===============================
 
     /**
-     * Verifikasi QR Code (simplified - hanya menampilkan info peserta)
+     * Verifikasi QR Code - MENGGUNAKAN EMAIL
      */
     public function verifyQR(Request $request)
     {
-        $nomor = $request->input('nomor');
+        $email = $request->input('email');
 
         try {
-            $peserta = PesertaLari::where('nomor_bib', $nomor)->first();
+            $peserta = PesertaLari::where('email', $email)->first();
             
             if (!$peserta) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Nomor BIB tidak ditemukan dalam database'
+                    'message' => 'Email tidak ditemukan dalam database'
                 ], 404);
             }
 
@@ -283,10 +316,9 @@ class PublicFormController extends Controller
                 'message' => 'Data peserta berhasil ditemukan',
                 'data' => [
                     'id' => $peserta->id,
-                    'nama' => $peserta->nama_lengkap,
-                    'nomor_bib' => $peserta->nomor_bib,
-                    'kategori' => $peserta->kategori_lari,
                     'email' => $peserta->email,
+                    'nama' => $peserta->nama_lengkap,
+                    'kategori' => $peserta->kategori_lari,
                     'telepon' => $peserta->telepon,
                     'waktu_daftar' => $peserta->created_at->format('d/m/Y H:i:s'),
                     'status' => $peserta->status
@@ -295,7 +327,7 @@ class PublicFormController extends Controller
 
         } catch (\Exception $e) {
             Log::error('QR Code verification error', [
-                'nomor' => $nomor,
+                'email' => $email,
                 'error' => $e->getMessage()
             ]);
             
@@ -307,13 +339,120 @@ class PublicFormController extends Controller
     }
 
     // ===============================
-    // WHATSAPP METHODS
+    // UTILITY METHODS
     // ===============================
 
     /**
-     * Send WhatsApp notification dengan retry mechanism
+     * Validate registration form data
      */
-    private function sendWhatsAppNotification($peserta, $qrCodeUrl)
+    private function validateRegistrationData(Request $request)
+    {
+        return $request->validate([
+            'nama_lengkap' => 'required|string|max:255',
+            'kategori_lari' => 'required|string|max:100',
+            'email' => 'required|email|unique:peserta_laris,email',
+            'telepon' => 'required|string|max:20',
+        ], [
+            'nama_lengkap.required' => 'Nama lengkap harus diisi',
+            'kategori_lari.required' => 'Kategori lari harus diisi',
+            'email.required' => 'Email harus diisi',
+            'email.email' => 'Format email tidak valid',
+            'email.unique' => 'Email sudah terdaftar, gunakan email lain',
+            'telepon.required' => 'Nomor telepon harus diisi'
+        ]);
+    }
+
+    /**
+     * Create new peserta record
+     */
+    private function createPeserta($validated, $preRegistered)
+    {
+        return PesertaLari::create([
+            'nomor_bib' => $preRegistered->nomor_bib, // Tetap ambil dari pre-registered
+            'nama_lengkap' => $validated['nama_lengkap'],
+            'kategori_lari' => $validated['kategori_lari'],
+            'email' => $validated['email'],
+            'telepon' => $validated['telepon'],
+            'qr_token' => Str::random(32),
+            'status' => 'terdaftar'
+        ]);
+    }
+
+    /**
+     * Get WhatsApp configuration
+     */
+    private function getWhatsAppConfig()
+    {
+        $config = [
+            'url' => config('services.wablas.url'),
+            'token' => config('services.wablas.token'),
+            'image_url' => config('services.wablas.image_url'),
+            'valid' => false
+        ];
+
+        $config['valid'] = !empty($config['token']) && !empty($config['url']);
+
+        return $config;
+    }
+
+    /**
+     * Validate QR Code URL
+     */
+    private function validateQRCodeUrl($qrCodeUrl)
+    {
+        try {
+            $response = Http::timeout(10)->head($qrCodeUrl);
+            
+            Log::info('QR Code URL validation', [
+                'url' => $qrCodeUrl,
+                'status_code' => $response->status(),
+                'content_type' => $response->header('Content-Type')
+            ]);
+            
+            return $response->successful() && 
+                   str_contains($response->header('Content-Type', ''), 'image');
+        } catch (\Exception $e) {
+            Log::error('QR Code URL validation failed', [
+                'url' => $qrCodeUrl,
+                'error' => $e->getMessage()
+            ]);
+            return false;
+        }
+    }
+
+    /**
+     * Format phone number for WhatsApp
+     */
+    private function formatPhoneNumber($phone)
+    {
+        $phoneNumber = preg_replace('/[^0-9]/', '', $phone);
+        
+        if (substr($phoneNumber, 0, 2) === '62') {
+            $formatted = $phoneNumber;
+        } elseif (substr($phoneNumber, 0, 1) === '0') {
+            $formatted = '62' . substr($phoneNumber, 1);
+        } elseif (substr($phoneNumber, 0, 1) === '8') {
+            $formatted = '62' . $phoneNumber;
+        } else {
+            $formatted = '62' . $phoneNumber;
+        }
+        
+        Log::info('Phone formatted', [
+            'original' => $phone,
+            'formatted' => $formatted
+        ]);
+        
+        return $formatted;
+    }
+
+    // ===============================
+    // WHATSAPP METHODS - NEW ORDER
+    // ===============================
+
+    /**
+     * Send WhatsApp notification dengan urutan baru: QR Code dahulu, kemudian message
+     */
+    private function sendWhatsAppNotificationNewOrder($peserta, $qrCodeUrl)
     {
         try {
             $config = $this->getWhatsAppConfig();
@@ -323,7 +462,7 @@ class PublicFormController extends Controller
 
             $phoneNumber = $this->formatPhoneNumber($peserta->telepon);
             
-            Log::info('Starting WhatsApp notification', [
+            Log::info('Starting WhatsApp notification (QR first)', [
                 'peserta_id' => $peserta->id,
                 'phone' => $phoneNumber,
                 'nama' => $peserta->nama_lengkap
@@ -338,29 +477,32 @@ class PublicFormController extends Controller
                 return ['success' => false, 'message' => 'QR Code URL tidak valid'];
             }
 
-            // Send text message first
-            $textResult = $this->sendWhatsAppText($phoneNumber, $peserta);
-            if (!$textResult['success']) {
-                return $textResult;
+            // STEP 1: Send QR Code image first
+            $imageResult = $this->sendWhatsAppImage($phoneNumber, $qrCodeUrl, $peserta);
+            
+            if (!$imageResult['success']) {
+                Log::warning('QR Code image failed, trying fallback', [
+                    'peserta_id' => $peserta->id
+                ]);
+                // Try fallback but continue with text message
             }
 
-            // Wait before sending image
-            sleep(3);
+            // Wait before sending text message
+            sleep(5);
 
-            // Send QR Code image
-            $imageResult = $this->sendWhatsAppImage($phoneNumber, $qrCodeUrl, $peserta);
+            // STEP 2: Send text message after QR Code
+            $textResult = $this->sendWhatsAppTextAfterQR($phoneNumber, $peserta);
 
             return [
-                'success' => $textResult['success'] && $imageResult['success'],
-                'message' => $imageResult['success'] 
-                    ? 'WhatsApp message and QR Code sent successfully'
-                    : 'Text sent but QR Code failed: ' . $imageResult['message'],
+                'success' => $imageResult['success'] && $textResult['success'],
+                'message' => $this->formatWhatsAppResult($imageResult, $textResult),
+                'image_success' => $imageResult['success'],
                 'text_success' => $textResult['success'],
-                'image_success' => $imageResult['success']
+                'order' => 'qr_first_then_message'
             ];
 
         } catch (\Exception $e) {
-            Log::error('WhatsApp notification error', [
+            Log::error('WhatsApp notification error (new order)', [
                 'peserta_id' => $peserta->id,
                 'error' => $e->getMessage()
             ]);
@@ -373,16 +515,32 @@ class PublicFormController extends Controller
     }
 
     /**
-     * Send WhatsApp text message with retry
+     * Format WhatsApp result message
      */
-    private function sendWhatsAppText($phoneNumber, $peserta, $maxRetries = 3)
+    private function formatWhatsAppResult($imageResult, $textResult)
+    {
+        if ($imageResult['success'] && $textResult['success']) {
+            return 'QR Code dan pesan coaching clinic berhasil dikirim';
+        } elseif ($imageResult['success'] && !$textResult['success']) {
+            return 'QR Code berhasil dikirim, pesan coaching clinic gagal: ' . $textResult['message'];
+        } elseif (!$imageResult['success'] && $textResult['success']) {
+            return 'Pesan coaching clinic berhasil dikirim, QR Code gagal: ' . $imageResult['message'];
+        } else {
+            return 'QR Code dan pesan coaching clinic gagal dikirim';
+        }
+    }
+
+    /**
+     * Send WhatsApp text message after QR Code
+     */
+    private function sendWhatsAppTextAfterQR($phoneNumber, $peserta, $maxRetries = 3)
     {
         $config = $this->getWhatsAppConfig();
-        $message = $this->prepareWhatsAppMessage($peserta);
+        $message = $this->prepareCoachingClinicSuccessMessage($peserta);
         
         for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
             try {
-                Log::info("WhatsApp text attempt {$attempt}", [
+                Log::info("WhatsApp success message attempt {$attempt}", [
                     'peserta_id' => $peserta->id,
                     'phone' => $phoneNumber
                 ]);
@@ -399,7 +557,7 @@ class PublicFormController extends Controller
                         'isGroup' => false
                     ]);
 
-                Log::info("WhatsApp text response attempt {$attempt}", [
+                Log::info("WhatsApp success message response attempt {$attempt}", [
                     'peserta_id' => $peserta->id,
                     'status_code' => $response->status(),
                     'successful' => $response->successful()
@@ -408,7 +566,7 @@ class PublicFormController extends Controller
                 if ($response->successful()) {
                     return [
                         'success' => true,
-                        'message' => 'Text message sent successfully',
+                        'message' => 'Coaching clinic success message sent successfully',
                         'attempts' => $attempt
                     ];
                 }
@@ -418,7 +576,7 @@ class PublicFormController extends Controller
                 }
 
             } catch (\Exception $e) {
-                Log::error("WhatsApp text attempt {$attempt} failed", [
+                Log::error("WhatsApp success message attempt {$attempt} failed", [
                     'peserta_id' => $peserta->id,
                     'error' => $e->getMessage()
                 ]);
@@ -431,7 +589,7 @@ class PublicFormController extends Controller
 
         return [
             'success' => false,
-            'message' => "Failed to send text message after {$maxRetries} attempts"
+            'message' => "Failed to send coaching clinic success message after {$maxRetries} attempts"
         ];
     }
 
@@ -564,176 +722,73 @@ class PublicFormController extends Controller
     }
 
     // ===============================
-    // UTILITY METHODS
+    // MESSAGE PREPARATION METHODS - UPDATED
     // ===============================
 
     /**
-     * Validate registration form data
+     * Prepare coaching clinic success message (sent after QR Code)
      */
-    private function validateRegistrationData(Request $request)
+    private function prepareCoachingClinicSuccessMessage($peserta)
     {
-        return $request->validate([
-            'nomor_bib' => 'required|string|unique:peserta_laris,nomor_bib',
-            'nama_lengkap' => 'required|string|max:255',
-            'kategori_lari' => 'required|string|max:100',
-            'email' => 'required|email|unique:peserta_laris,email',
-            'telepon' => 'required|string|max:20',
-        ], [
-            'nomor_bib.required' => 'Nomor BIB harus diisi',
-            'nomor_bib.unique' => 'Nomor BIB sudah terdaftar',
-            'nama_lengkap.required' => 'Nama lengkap harus diisi',
-            'kategori_lari.required' => 'Kategori lari harus diisi',
-            'email.required' => 'Email harus diisi',
-            'email.email' => 'Format email tidak valid',
-            'email.unique' => 'Email sudah terdaftar, gunakan email lain',
-            'telepon.required' => 'Nomor telepon harus diisi'
-        ]);
-    }
-
-    /**
-     * Create new peserta record
-     */
-    private function createPeserta($validated)
-    {
-        return PesertaLari::create([
-            'nomor_bib' => $validated['nomor_bib'],
-            'nama_lengkap' => $validated['nama_lengkap'],
-            'kategori_lari' => $validated['kategori_lari'],
-            'email' => $validated['email'],
-            'telepon' => $validated['telepon'],
-            'qr_token' => Str::random(32),
-            'status' => 'terdaftar'
-        ]);
-    }
-
-    /**
-     * Get WhatsApp configuration
-     */
-    private function getWhatsAppConfig()
-    {
-        $config = [
-            'url' => config('services.wablas.url'),
-            'token' => config('services.wablas.token'),
-            'image_url' => config('services.wablas.image_url'),
-            'valid' => false
-        ];
-
-        $config['valid'] = !empty($config['token']) && !empty($config['url']);
-
-        return $config;
-    }
-
-    /**
-     * Validate QR Code URL
-     */
-    private function validateQRCodeUrl($qrCodeUrl)
-    {
-        try {
-            $response = Http::timeout(10)->head($qrCodeUrl);
-            
-            Log::info('QR Code URL validation', [
-                'url' => $qrCodeUrl,
-                'status_code' => $response->status(),
-                'content_type' => $response->header('Content-Type')
-            ]);
-            
-            return $response->successful() && 
-                   str_contains($response->header('Content-Type', ''), 'image');
-        } catch (\Exception $e) {
-            Log::error('QR Code URL validation failed', [
-                'url' => $qrCodeUrl,
-                'error' => $e->getMessage()
-            ]);
-            return false;
-        }
-    }
-
-    /**
-     * Format phone number for WhatsApp
-     */
-    private function formatPhoneNumber($phone)
-    {
-        $phoneNumber = preg_replace('/[^0-9]/', '', $phone);
+        $remainingSlots = self::MAX_REGISTRATIONS - PesertaLari::count();
+        $registrationNumber = PesertaLari::count();
         
-        if (substr($phoneNumber, 0, 2) === '62') {
-            $formatted = $phoneNumber;
-        } elseif (substr($phoneNumber, 0, 1) === '0') {
-            $formatted = '62' . substr($phoneNumber, 1);
-        } elseif (substr($phoneNumber, 0, 1) === '8') {
-            $formatted = '62' . $phoneNumber;
-        } else {
-            $formatted = '62' . $phoneNumber;
-        }
-        
-        Log::info('Phone formatted', [
-            'original' => $phone,
-            'formatted' => $formatted
-        ]);
-        
-        return $formatted;
-    }
-
-    // ===============================
-    // MESSAGE PREPARATION METHODS
-    // ===============================
-
-    /**
-     * Prepare WhatsApp message
-     */
-    private function prepareWhatsAppMessage($peserta)
-    {
-        return "🎉 BAYAN RUN 2025 - COACHING CLINIC BERHASIL! 🎉\n\n" .
-               "Halo {$peserta->nama_lengkap}! 👋\n\n" .
-               "Terima kasih telah mendaftar di Coaching Clinic Bayan Run 2025! 🏃‍♂️✨\n\n" .
+        return "🎉 COACHING CLINIC BAYAN RUN 2025 BERHASIL! 🎉\n\n" .
+               "Selamat {$peserta->nama_lengkap}! 👋\n\n" .
+               "Pendaftaran Anda di Coaching Clinic Bayan Run 2025 telah berhasil! 🏃‍♂️✨\n\n" .
                "📋 DETAIL PENDAFTARAN:\n" .
                "━━━━━━━━━━━━━━━━━━━━━━━━━\n" .
-               "🎫 BIB: {$peserta->nomor_bib}\n" .
                "👤 Nama: {$peserta->nama_lengkap}\n" .
                "🏆 Kategori: {$peserta->kategori_lari}\n" .
                "📧 Email: {$peserta->email}\n" .
                "📱 No. HP: {$peserta->telepon}\n" .
+               "🔢 Peserta ke: {$registrationNumber}/600\n" .
                "━━━━━━━━━━━━━━━━━━━━━━━━━\n\n" .
-               "📱 QR Code Anda akan dikirim sebagai gambar berikutnya sebagai bukti registrasi.\n\n" .
+               "📱 QR Code telah dikirim sebelumnya sebagai bukti registrasi Anda.\n\n" .
                "⚠️ PENTING:\n" .
-               "• Simpan QR Code ini dengan baik\n" .
+               "• Simpan QR Code dengan baik\n" .
                "• Tunjukkan QR Code saat check-in event\n" .
-               "• Datang 30 menit sebelum acara dimulai\n\n" .
-               "🎯 Info lebih lanjut akan kami kirimkan menjelang event.\n\n" .
-               "Pesan ini bersifat automatis dan tidak menerima balasan.\n\n" .
-               "Sampai jumpa di coaching clinic! 🏃‍♂️🏃‍♀️\n\n" .
+               "• QR ini adalah tiket masuk Anda\n\n" .
+               "📊 Status Pendaftaran: {$remainingSlots} slot tersisa dari 600\n\n" .
+               "🎯 Info detail coaching clinic akan dikirimkan menjelang event.\n\n" .
+               "Terima kasih telah bergabung! Sampai jumpa di coaching clinic! 🏃‍♂️🏃‍♀️\n\n" .
                "Salam Olahraga,\n" .
                "Tim Bayan Run 2025 🏃‍♂️✨";
     }
 
     /**
-     * Prepare QR Code caption
+     * Prepare QR Code caption (sent first)
      */
     private function prepareQRCodeCaption($peserta)
     {
-        return "🎫 QR Code Pendaftaran Coaching Clinic Bayan Run 2025\n" .
-               "📝 BIB: {$peserta->nomor_bib}\n" .
-               "👤 Nama: {$peserta->nama_lengkap}\n" .
+        return "🎫 QR CODE COACHING CLINIC BAYAN RUN 2025\n\n" .
+               "Halo {$peserta->nama_lengkap}! 👋\n\n" .
+               "Ini adalah QR Code pendaftaran Anda:\n" .
                "🏃‍♂️ Kategori: {$peserta->kategori_lari}\n\n" .
-               "⚠️ Simpan QR Code ini untuk verifikasi peserta!";
+               "🔒 SIMPAN QR CODE INI DENGAN BAIK!\n" .
+               "Ini adalah tiket masuk Anda ke coaching clinic.\n\n" .
+               "Detail lengkap akan dikirim pada pesan berikutnya... 📩";
     }
 
     /**
-     * Prepare fallback message
+     * Prepare fallback message - MENGGUNAKAN EMAIL
      */
     private function prepareFallbackMessage($peserta)
     {
-        return "🚨 QR CODE FALLBACK 🚨\n\n" .
+        return "🚨 QR CODE FALLBACK - COACHING CLINIC BAYAN RUN 2025 🚨\n\n" .
+               "Halo {$peserta->nama_lengkap}! 👋\n\n" .
                "Maaf, terjadi kendala teknis dalam mengirim QR Code sebagai gambar.\n\n" .
                "📋 DATA VERIFIKASI ANDA:\n" .
                "━━━━━━━━━━━━━━━━━━━━━━━━━\n" .
-               "🎫 BIB: {$peserta->nomor_bib}\n" .
                "👤 Nama: {$peserta->nama_lengkap}\n" .
                "🏆 Kategori: {$peserta->kategori_lari}\n" .
+               "📧 Email: {$peserta->email}\n" .
                "━━━━━━━━━━━━━━━━━━━━━━━━━\n\n" .
                "📱 Link verifikasi:\n" .
-               "https://coaching.bayanevent.com/verify.html?nomor={$peserta->nomor_bib}#" . str_replace(' ', '_', $peserta->nama_lengkap) . "\n\n" .
+               "https://coaching.bayanevent.com/verify?email=" . urlencode($peserta->email) . "#" . str_replace(' ', '_', $peserta->nama_lengkap) . "\n\n" .
                "📱 Anda dapat menggunakan link di atas untuk verifikasi.\n\n" .
-               "🔄 QR Code gambar akan dikirim ulang secepatnya.";
+               "🔄 QR Code gambar akan dikirim ulang secepatnya.\n\n" .
+               "Detail coaching clinic akan dikirim pada pesan berikutnya...";
     }
 
     // ===============================
@@ -805,9 +860,9 @@ class PublicFormController extends Controller
                 'nama' => $peserta->nama_lengkap
             ]);
             
-            // Generate QR dengan format URL baru
+            // Generate QR dengan format URL baru - MENGGUNAKAN EMAIL
             $namaFormatted = str_replace(' ', '_', $peserta->nama_lengkap);
-            $qrUrl = "https://coaching.bayanevent.com/verify.html?nomor=" . $peserta->nomor_bib 
+            $qrUrl = "https://coaching.bayanevent.com/verify?email=" . urlencode($peserta->email) 
                    . "#" . $namaFormatted;
 
             $qrCodeUrl = $this->generateQRCodeURL($qrUrl);
@@ -840,7 +895,11 @@ class PublicFormController extends Controller
     public function showRegistrations()
     {
         $pesertaLaris = PesertaLari::orderBy('created_at', 'desc')->get();
-        return view('registrations.index', compact('pesertaLaris'));
+        $totalRegistrations = $pesertaLaris->count();
+        $remainingSlots = self::MAX_REGISTRATIONS - $totalRegistrations;
+        $registrationOpen = $totalRegistrations < self::MAX_REGISTRATIONS;
+        
+        return view('registrations.index', compact('pesertaLaris', 'totalRegistrations', 'remainingSlots', 'registrationOpen'));
     }
 
     /**
@@ -862,7 +921,9 @@ class PublicFormController extends Controller
         
         return response()->json([
             'message' => 'Export functionality untuk peserta event lari',
-            'total_data' => $pesertaLaris->count()
+            'total_data' => $pesertaLaris->count(),
+            'max_registrations' => self::MAX_REGISTRATIONS,
+            'remaining_slots' => self::MAX_REGISTRATIONS - $pesertaLaris->count()
         ]);
     }
 
@@ -872,6 +933,8 @@ class PublicFormController extends Controller
     public function getStats()
     {
         $totalPeserta = PesertaLari::count();
+        $remainingSlots = self::MAX_REGISTRATIONS - $totalPeserta;
+        $registrationOpen = $totalPeserta < self::MAX_REGISTRATIONS;
         
         $pesertaPerKategori = PesertaLari::select('kategori_lari', DB::raw('count(*) as total'))
             ->groupBy('kategori_lari')
@@ -881,13 +944,38 @@ class PublicFormController extends Controller
 
         return response()->json([
             'total_peserta' => $totalPeserta,
+            'max_registrations' => self::MAX_REGISTRATIONS,
+            'remaining_slots' => $remainingSlots,
+            'registration_open' => $registrationOpen,
+            'percentage_full' => round(($totalPeserta / self::MAX_REGISTRATIONS) * 100, 2),
             'peserta_per_kategori' => $pesertaPerKategori,
             'peserta_terbaru' => $pesertaTerbaru
         ]);
     }
 
     /**
-     * Regenerate QR Code untuk peserta tertentu
+     * Check registration status
+     */
+    public function checkRegistrationStatus()
+    {
+        $totalRegistrations = PesertaLari::count();
+        $remainingSlots = self::MAX_REGISTRATIONS - $totalRegistrations;
+        $registrationOpen = $totalRegistrations < self::MAX_REGISTRATIONS;
+        
+        return response()->json([
+            'registration_open' => $registrationOpen,
+            'total_registrations' => $totalRegistrations,
+            'max_registrations' => self::MAX_REGISTRATIONS,
+            'remaining_slots' => $remainingSlots,
+            'percentage_full' => round(($totalRegistrations / self::MAX_REGISTRATIONS) * 100, 2),
+            'message' => $registrationOpen 
+                ? "Pendaftaran masih terbuka. {$remainingSlots} slot tersisa."
+                : "Pendaftaran telah ditutup. Batas maksimal 600 peserta telah tercapai."
+        ]);
+    }
+
+    /**
+     * Regenerate QR Code untuk peserta tertentu - MENGGUNAKAN EMAIL
      */
     public function regenerateQR($id)
     {
@@ -897,8 +985,8 @@ class PublicFormController extends Controller
             // Format nama untuk URL
             $namaFormatted = str_replace(' ', '_', $peserta->nama_lengkap);
             
-            // Buat URL dengan format baru
-            $qrUrl = "https://coaching.bayanevent.com/verify.html?nomor=" . $peserta->nomor_bib 
+            // Buat URL dengan format baru - MENGGUNAKAN EMAIL
+            $qrUrl = "https://coaching.bayanevent.com/verify?email=" . urlencode($peserta->email)
                    . "#" . $namaFormatted;
 
             $qrCodeUrl = $this->generateQRCodeURL($qrUrl);
@@ -926,4 +1014,84 @@ class PublicFormController extends Controller
         }
     }
 
+    /**
+     * Get registration limit info
+     */
+    public function getRegistrationLimit()
+    {
+        return response()->json([
+            'max_registrations' => self::MAX_REGISTRATIONS,
+            'description' => 'Batas maksimal pendaftaran coaching clinic'
+        ]);
+    }
+
+    /**
+     * Bulk send QR codes (admin function)
+     */
+    public function bulkSendQR(Request $request)
+    {
+        $pesertaIds = $request->input('peserta_ids', []);
+        
+        if (empty($pesertaIds)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Tidak ada peserta yang dipilih'
+            ], 400);
+        }
+
+        $results = [];
+        $successful = 0;
+        $failed = 0;
+
+        foreach ($pesertaIds as $pesertaId) {
+            try {
+                $peserta = PesertaLari::findOrFail($pesertaId);
+                
+                $namaFormatted = str_replace(' ', '_', $peserta->nama_lengkap);
+                $qrUrl = "https://coaching.bayanevent.com/verify?email=" . urlencode($peserta->email)
+                       . "#" . $namaFormatted;
+
+                $qrCodeUrl = $this->generateQRCodeURL($qrUrl);
+                $phoneNumber = $this->formatPhoneNumber($peserta->telepon);
+                
+                $whatsappResult = $this->sendWhatsAppNotificationNewOrder($peserta, $qrCodeUrl);
+                
+                if ($whatsappResult['success']) {
+                    $successful++;
+                } else {
+                    $failed++;
+                }
+
+                $results[] = [
+                    'peserta_id' => $pesertaId,
+                    'nama' => $peserta->nama_lengkap,
+                    'success' => $whatsappResult['success'],
+                    'message' => $whatsappResult['message']
+                ];
+
+                // Delay between sends to avoid rate limiting
+                sleep(2);
+
+            } catch (\Exception $e) {
+                $failed++;
+                $results[] = [
+                    'peserta_id' => $pesertaId,
+                    'nama' => 'Unknown',
+                    'success' => false,
+                    'message' => 'Error: ' . $e->getMessage()
+                ];
+            }
+        }
+
+        return response()->json([
+            'success' => $successful > 0,
+            'message' => "Bulk send completed. {$successful} berhasil, {$failed} gagal.",
+            'summary' => [
+                'total' => count($pesertaIds),
+                'successful' => $successful,
+                'failed' => $failed
+            ],
+            'results' => $results
+        ]);
+    }
 }

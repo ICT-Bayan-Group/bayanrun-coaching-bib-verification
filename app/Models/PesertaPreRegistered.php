@@ -13,7 +13,6 @@ class PesertaPreRegistered extends Model
 
     protected $fillable = [
         'nama',
-        'nomor_bib',
         'email',
         'nomor_telepon',
         'kategori_lari',
@@ -67,10 +66,10 @@ class PesertaPreRegistered extends Model
     }
 
     /**
-     * Find by BIB number
+     * Find by Email
      */
-    public static function findByBib($bibNumber)
+    public static function findByEmail($email)
     {
-        return static::where('nomor_bib', $bibNumber)->first();
+        return static::where('email', $email)->first();
     }
 }
