@@ -77,8 +77,8 @@
             opacity: 1;
         }
 
-        /* BIB Verification Loading Overlay */
-        .bib-loading-overlay {
+        /* Email Verification Loading Overlay */
+        .email-loading-overlay {
             position: fixed;
             top: 0;
             left: 0;
@@ -96,12 +96,12 @@
             transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
         }
 
-        .bib-loading-overlay.show {
+        .email-loading-overlay.show {
             opacity: 1;
             visibility: visible;
         }
 
-        .bib-loading-content {
+        .email-loading-content {
             background: linear-gradient(135deg, #560000ff 0%, #8b0202ff 30%, #021f6eff 70%, #00113fff 100%);
             border-radius: 20px;
             padding: 3rem 2rem;
@@ -113,7 +113,7 @@
             transition: transform 0.3s ease-out;
         }
 
-        .bib-loading-overlay.show .bib-loading-content {
+        .email-loading-overlay.show .email-loading-content {
             transform: translateY(0) scale(1);
         }
 
@@ -265,13 +265,13 @@
             animation: subtitleSlideUp 1s ease-out 1.2s forwards;
         }
 
-        .bib-loading-title {
+        .email-loading-title {
             opacity: 0;
             transform: translateY(15px);
             animation: titleFadeIn 0.5s ease-out 0.2s forwards;
         }
 
-        .bib-loading-subtitle {
+        .email-loading-subtitle {
             opacity: 0;
             transform: translateY(10px);
             animation: subtitleFadeIn 0.5s ease-out 0.4s forwards;
@@ -636,19 +636,19 @@
         </div>
     </div>
 
-    <!-- BIB Verification Loading Overlay -->
-    <div id="bib-loading-overlay" class="bib-loading-overlay">
-        <div class="bib-loading-content">
+    <!-- Email Verification Loading Overlay -->
+    <div id="email-loading-overlay" class="email-loading-overlay">
+        <div class="email-loading-content">
             <div class="logo-container">
                 <div class="logo-glow-small"></div>
-                <img src="{{ asset('images/bayanrun.png') }}" alt="Bayan Run 2025" class="logo-small object-contain mx-auto">
+                <img src="{{ asset('images/bayanrun.png') }}" alt="Bayan Run 2025" class="logo-medium object-contain mx-auto">
             </div>
             
-            <h3 class="bib-loading-title text-lg font-bold text-white">
-                Memverifikasi BIB
+            <h3 class="email-loading-title text-lg font-bold text-white">
+                Memverifikasi Email
             </h3>
             
-            <p class="bib-loading-subtitle text-white text-sm font-medium mt-2">
+            <p class="email-loading-subtitle text-white text-sm font-medium mt-2">
                 Mohon tunggu sebentar...
             </p>
             
@@ -680,27 +680,27 @@
                 <p class="text-white font-bold mt-1 sm:mt-2 text-sm sm:text-xl uppercase">BAYAN RUN 2025</p>
             </div>
 
-            <!-- BIB Verification Form -->
-            <div id="bib-verification" class="bg-white shadow-lg rounded-lg p-6 sm:p-8">
+            <!-- Email Verification Form -->
+            <div id="email-verification" class="bg-white shadow-lg rounded-lg p-6 sm:p-8">
                 <h2 class="text-2xl sm:text-3xl font-bold mb-6 text-center text-gray-800">
                     <span class="inline-block mr-2">🎫</span>
-                    Verifikasi Nomor BIB
+                    Verifikasi Email Terdaftar
                 </h2>
                 
-                <form id="bib-form" class="space-y-6">
+                <form id="email-form" class="space-y-6">
                     <div>
                         <label class="block font-medium text-gray-700 mb-2">
                             <span class="flex items-center font-semibold">
                                 <span class="inline-block mr-2">🏃‍♂️</span>
-                                Nomor BIB *
+                                Email *
                             </span>
                         </label>
                         <input type="text" 
-                               id="nomor_bib" 
+                               id="email" 
                                required 
                                class="font-semibold w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
-                               placeholder="Masukkan nomor BIB Anda">
-                        <div class="text-red-500 text-sm mt-1 font-extrabold hidden" id="error-nomor_bib"></div>
+                               placeholder="Masukkan nomor Email Anda">
+                       <div class="text-red-500 text-sm mt-1 font-extrabold hidden" id="error-nomor_email"></div>
                     </div>
                     
                     <!-- Info Section -->
@@ -712,7 +712,7 @@
                             <div class="ml-3">
                                 <p class="text-sm text-blue-800 font-semibold">
                                     <strong>Informasi:</strong><br>
-                                    Masukkan nomor BIB sesuai dengan yang tercantum pada email undangan Anda untuk melanjutkan proses pendaftaran.
+                                    Masukkan nomor Email sesuai dengan yang tercantum pada email undangan Anda untuk melanjutkan proses pendaftaran.
                                 </p>
                             </div>
                         </div>
@@ -723,7 +723,7 @@
                             class="w-full bg-blue-700 hover:from-red-800 hover:to-red-600 text-white font-semibold py-4 rounded-lg transition-all duration-300 transform hover:scale-105 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:transform-none">
                         <span id="btn-verify-text">
                             <span class="inline-block mr-2">🔍</span>
-                            Verifikasi BIB
+                            Verifikasi Email
                         </span>
                     </button>
                 </form>
@@ -744,8 +744,8 @@
                         </div>
                         <div class="ml-3">
                             <p class="text-sm text-green-700 font-semibold">
-                                <strong>BIB Terverifikasi!</strong><br>
-                                <span id="verified-name"></span> - BIB #<span id="verified-bib"></span>
+                                <strong>Email Terverifikasi!</strong><br>
+                                <span id="verified-name"></span> - Email: <span id="verified-email"></span>
                             </p>
                         </div>
                     </div>
@@ -756,14 +756,14 @@
                         <label class="block font-medium text-gray-700 mb-2">
                             <span class="flex items-center font-semibold">
                                 <span class="inline-block mr-2">🎫</span>
-                                Nomor BIB *
+                                Email *
                             </span>
                         </label>
                         <input type="text" 
-                               id="nomor_bib_readonly" 
+                               id="email_readonly" 
                                readonly 
                                class="font-semibold w-full border border-gray-300 rounded-lg p-3 bg-gray-100 cursor-not-allowed" 
-                               placeholder="Nomor BIB">
+                               placeholder="Email">
                         <div class="text-gray-500 text-sm mt-1">Field ini tidak dapat diubah</div>
                     </div>
                     
@@ -795,22 +795,6 @@
                                class="font-semibold w-full border border-gray-300 rounded-lg p-3 bg-gray-100 cursor-not-allowed" 
                                placeholder="Kategori lari">
                         <div class="text-gray-500 text-sm mt-1">Field ini tidak dapat diubah</div>
-                    </div>
-
-                    <div>
-                        <label class="block font-medium text-gray-700 mb-2">
-                            <span class="flex items-center font-semibold">
-                                <span class="inline-block mr-2">📧</span>
-                                Email *
-                            </span>
-                        </label>
-                        <input type="email" 
-                               id="email" 
-                               required 
-                               class=" font-semibold w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
-                               placeholder="email@example.com">
-                        <div class="text-red-500 font-extrabold text-sm mt-1 hidden" id="error-email"></div>
-                        <div class="text-blue-600 text-sm mt-1">Anda dapat mengubah email jika diperlukan</div>
                     </div>
                     
                     <div>
@@ -875,10 +859,10 @@
                         Detail Pendaftaran
                     </h3>
                     <div class="grid gap-2 text-sm">
-                        <div class="flex justify-between">
+                        <!--<div class="flex justify-between">
                             <span class="font-medium">BIB:</span>
                             <span id="success-bib"></span>
-                        </div>
+                        </div>-->
                         <div class="flex justify-between">
                             <span class="font-medium">Nama:</span>
                             <span id="success-nama"></span>
@@ -969,13 +953,13 @@
                     
                     setTimeout(function() {
                         // Reset all forms and show initial state
-                        document.getElementById('bib-form').reset();
+                        document.getElementById('email-form').reset();
                         document.getElementById('pendaftaran-form').reset();
                         clearErrors();
                         
                         document.getElementById('success-message').classList.add('hidden');
                         document.getElementById('form-pendaftaran').classList.add('hidden');
-                        document.getElementById('bib-verification').classList.remove('hidden');
+                        document.getElementById('email-verification').classList.remove('hidden');
                         
                         document.getElementById('qr-preview').classList.add('hidden');
                         currentPesertaData = null;
@@ -990,15 +974,15 @@
             }, 300);
         }
 
-        // Show BIB Loading Overlay
-        function showBibLoading() {
-            const overlay = document.getElementById('bib-loading-overlay');
+        // Show Email Loading Overlay
+        function showEmailLoading() {
+            const overlay = document.getElementById('email-loading-overlay');
             overlay.classList.add('show');
         }
 
-        // Hide BIB Loading Overlay
-        function hideBibLoading() {
-            const overlay = document.getElementById('bib-loading-overlay');
+        // Hide Email Loading Overlay
+        function hideEmailLoading() {
+            const overlay = document.getElementById('email-loading-overlay');
             overlay.classList.remove('show');
         }
 
@@ -1027,16 +1011,16 @@
             }, 2500); // Shorter duration for reset
         }
 
-        // BIB verification handler
-        document.getElementById('bib-form').addEventListener('submit', async function(e) {
+        // Email verification handler
+        document.getElementById('email-form').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             clearErrors();
             
-            const nomorBib = document.getElementById('nomor_bib').value.trim();
+            const email = document.getElementById('email').value.trim();
             
-            if (!nomorBib) {
-                showError('nomor_bib', 'Nomor BIB harus diisi');
+            if (!email) {
+                showError('email', 'Email harus diisi');
                 return;
             }
 
@@ -1045,20 +1029,20 @@
             const originalText = btnVerifyText.innerHTML;
             
             // Show loading overlay
-            showBibLoading();
+            showEmailLoading();
             
             btnVerify.disabled = true;
             btnVerifyText.innerHTML = '<span class="inline-block mr-2 spin">🔍</span>Memverifikasi...';
 
             try {
-                const response = await fetch('/verify-bib', {
+                const response = await fetch('/verify-email', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
                         'Accept': 'application/json'
                     },
-                    body: JSON.stringify({ nomor_bib: nomorBib })
+                    body: JSON.stringify({ email: email })
                 });
 
                 const result = await response.json();
@@ -1068,17 +1052,17 @@
 
                 if (result.success) {
                     currentPesertaData = result.data;
-                    hideBibLoading();
+                    hideEmailLoading();
                     showRegistrationForm(result.data);
                 } else {
-                    hideBibLoading();
-                    showError('nomor_bib', result.message || 'Nomor BIB tidak ditemukan');
+                    hideEmailLoading();
+                    showError('email', result.message || 'Email tidak ditemukan');
                 }
 
             } catch (error) {
                 console.error('Error:', error);
-                hideBibLoading();
-                showError('nomor_bib', 'Terjadi kesalahan saat memverifikasi BIB. Silakan coba lagi.');
+                hideEmailLoading();
+                showError('email', 'Terjadi kesalahan saat memverifikasi email. Silakan coba lagi.');
             } finally {
                 btnVerify.disabled = false;
                 btnVerifyText.innerHTML = originalText;
@@ -1092,10 +1076,9 @@
             clearErrors();
             
             const formData = {
-                nomor_bib: document.getElementById('nomor_bib_readonly').value.trim(),
+                 email: document.getElementById('email_readonly').value.trim(),
                 nama_lengkap: document.getElementById('nama_lengkap').value.trim(),
                 kategori_lari: document.getElementById('kategori_lari').value.trim(),
-                email: document.getElementById('email').value.trim(),
                 telepon: document.getElementById('telepon').value.trim()
             };
             
@@ -1143,16 +1126,15 @@
         });
 
         function showRegistrationForm(data) {
-            document.getElementById('bib-verification').classList.add('hidden');
+            document.getElementById('email-verification').classList.add('hidden');
             document.getElementById('form-pendaftaran').classList.remove('hidden');
             
             document.getElementById('verified-name').textContent = data.nama;
-            document.getElementById('verified-bib').textContent = data.nomor_bib;
-            
-            document.getElementById('nomor_bib_readonly').value = data.nomor_bib;
+            document.getElementById('verified-email').textContent = data.email;
+
+            document.getElementById('email_readonly').value = data.email;
             document.getElementById('nama_lengkap').value = data.nama;
             document.getElementById('kategori_lari').value = data.kategori_lari;
-            document.getElementById('email').value = data.email;
             document.getElementById('telepon').value = data.nomor_telepon;
             
             window.scrollTo(0, 0);
@@ -1218,8 +1200,8 @@
         function showSuccessMessage(data) {
             document.getElementById('form-pendaftaran').classList.add('hidden');
             document.getElementById('success-message').classList.remove('hidden');
-            
-            document.getElementById('success-bib').textContent = data.nomor_bib;
+
+            document.getElementById('success-email').textContent = data.email;
             document.getElementById('success-nama').textContent = data.nama;
             document.getElementById('success-kategori').textContent = data.kategori;
             document.getElementById('success-email').textContent = document.getElementById('email').value;
@@ -1238,13 +1220,13 @@
             
             // Clear form data after a short delay
             setTimeout(function() {
-                document.getElementById('bib-form').reset();
+                document.getElementById('email-form').reset();
                 document.getElementById('pendaftaran-form').reset();
                 clearErrors();
                 
                 document.getElementById('success-message').classList.add('hidden');
                 document.getElementById('form-pendaftaran').classList.add('hidden');
-                document.getElementById('bib-verification').classList.remove('hidden');
+                document.getElementById('email-verification').classList.remove('hidden');
                 
                 document.getElementById('qr-preview').classList.add('hidden');
                 currentPesertaData = null;
@@ -1282,7 +1264,7 @@
                     this.classList.remove('border-red-500');
                 }
                 
-                if (!value && field !== 'nomor_bib_readonly' && field !== 'nama_lengkap' && field !== 'kategori_lari') {
+                if (!value && field !== 'email_readonly' && field !== 'nama_lengkap' && field !== 'kategori_lari') {
                     showError(field, 'Field ini harus diisi');
                 } else if (field === 'email' && value && !isValidEmail(value)) {
                     showError(field, 'Format email tidak valid');

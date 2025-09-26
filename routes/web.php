@@ -11,35 +11,53 @@ use Illuminate\Support\Facades\Route;
 // Event Lari Routes - Public Form
 Route::get('/', [PublicFormController::class, 'index'])->name('event.form');
 
-// BIB Verification Route
-Route::post('/verify-bib', [PublicFormController::class, 'verifyBib'])->name('event.verify-bib');
+// Email Verification Route
+Route::post('/verify-email', [PublicFormController::class, 'verifyEmail'])->name('event.verify.email');
 
 // Registration Route
 Route::post('/daftar', [PublicFormController::class, 'store'])->name('event.store');
+
+// QR Code Verification Routes - UPDATED
+Route::get('/verify', [PublicFormController::class, 'verifyQR'])->name('qr.verify.email');
+Route::post('/verify', [PublicFormController::class, 'verifyQR'])->name('qr.verify.email.post');
 
 // WhatsApp Test Route
 Route::get('/test-whatsapp', [PublicFormController::class, 'testWhatsApp'])->name('test.whatsapp');
 Route::post('/test-whatsapp', [PublicFormController::class, 'testWhatsApp'])->name('test.whatsapp.post');
 
-// QR Code Retry Route - NEW
+// QR Code Retry Route
 Route::post('/retry-qr/{pesertaId}', [PublicFormController::class, 'retryQRCode'])->name('retry.qr');
+
+// Check Registration Status Route
+Route::get('/registration-status', [PublicFormController::class, 'checkRegistrationStatus'])->name('registration.status');
 
 // Admin Routes - Dashboard & Management
 Route::prefix('admin')->name('admin.')->group(function () {
+    Route::get('/', [PublicFormController::class, 'showRegistrations'])->name('dashboard');
     Route::get('/dashboard', [PublicFormController::class, 'showRegistrations'])->name('registrations.index');
-    Route::get('/peserta', [PublicFormController::class, 'showRegistrations'])->name('registrations.index');
-    Route::get('/peserta/{id}', [PublicFormController::class, 'showDetail'])->name('registrations.detail');
+    Route::get('/peserta', [PublicFormController::class, 'showRegistrations'])->name('peserta.index');
+    Route::get('/peserta/{id}', [PublicFormController::class, 'showDetail'])->name('peserta.detail');
     Route::get('/export', [PublicFormController::class, 'export'])->name('export');
     
     // Regenerate QR Route
     Route::post('/peserta/{id}/regenerate-qr', [PublicFormController::class, 'regenerateQR'])->name('regenerate.qr');
+    
+    // Bulk Operations
+    Route::post('/bulk-send-qr', [PublicFormController::class, 'bulkSendQR'])->name('bulk.send.qr');
+    
+    // Registration Limit Management
+    Route::get('/registration-limit', [PublicFormController::class, 'getRegistrationLimit'])->name('registration.limit');
 });
 
 // API Routes - Statistics & QR Verification
 Route::prefix('api')->name('api.')->group(function () {
     Route::get('/stats', [PublicFormController::class, 'getStats'])->name('stats');
-    Route::get('/verify/{token}', [PublicFormController::class, 'verifyQR'])->name('qr.verify');
+    Route::get('/registration-status', [PublicFormController::class, 'checkRegistrationStatus'])->name('registration.status');
+    
+    // QR Verification API
+    Route::get('/verify/{token}', [PublicFormController::class, 'verifyQR'])->name('qr.verify.token');
+    Route::post('/verify', [PublicFormController::class, 'verifyQR'])->name('qr.verify.api');
 });
 
-// Alternative route for QR verification (shorter URL)
+// Legacy route for backward compatibility
 Route::get('/verify/{token}', [PublicFormController::class, 'verifyQR'])->name('qr.verify.short');

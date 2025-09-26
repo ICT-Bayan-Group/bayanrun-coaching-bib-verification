@@ -93,10 +93,10 @@ class PesertaLari extends Model
     }
 
     /**
-     * Find by BIB number
+     * Find by Email
      */
-    public static function findByBib($bibNumber)
+    public static function findByEmail($email)
     {
-        return static::where('nomor_bib', $bibNumber)->first();
+        return static::where('email', $email)->first();
     }
 }
