@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('peserta_laris', function (Blueprint $table) {
             $table->id();
-            $table->string('nomor_bib')->unique(); // Add BIB number
             $table->string('nama_lengkap');
             $table->string('kategori_lari', 100);
             $table->string('email')->unique();
@@ -27,7 +26,7 @@ return new class extends Migration
 
             // Indexes
             $table->index(['kategori_lari', 'status']);
-            $table->index('nomor_bib');
+            $table->index('email');
             $table->index('created_at');
         });
     }
