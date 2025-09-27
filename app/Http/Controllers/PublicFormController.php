@@ -13,7 +13,7 @@ use Illuminate\Support\Str;
 class PublicFormController extends Controller
 {
     // Maximum allowed registrations
-    private const MAX_REGISTRATIONS = 600;
+    private const MAX_REGISTRATIONS = 8;
 
     // ===============================
     // PUBLIC FORM METHODS
@@ -76,7 +76,6 @@ class PublicFormController extends Controller
                 'message' => 'Email berhasil diverifikasi',
                 'data' => [
                     'email' => $peserta->email,
-                    'nomor_bib' => $peserta->nomor_bib,
                     'nama' => $peserta->nama,
                     'kategori_lari' => $peserta->kategori_lari,
                     'nomor_telepon' => $peserta->nomor_telepon,
@@ -368,7 +367,7 @@ class PublicFormController extends Controller
     private function createPeserta($validated, $preRegistered)
     {
         return PesertaLari::create([
-            'nomor_bib' => $preRegistered->nomor_bib, // Tetap ambil dari pre-registered
+            'email' => $preRegistered->email, // Tetap ambil dari pre-registered
             'nama_lengkap' => $validated['nama_lengkap'],
             'kategori_lari' => $validated['kategori_lari'],
             'email' => $validated['email'],
