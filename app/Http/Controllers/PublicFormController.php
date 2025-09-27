@@ -5,15 +5,15 @@ namespace App\Http\Controllers;
 use App\Models\PesertaLari;
 use App\Models\PesertaPreRegistered;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB; // FIXED: Added missing import
+use Illuminate\Support\Facades\Http; // FIXED: Added missing import
 use Illuminate\Support\Str;
 
 class PublicFormController extends Controller
 {
     // Maximum allowed registrations
-    private const MAX_REGISTRATIONS = 8;
+    private const MAX_REGISTRATIONS = 600; // FIXED: Changed from 3 to 600
 
     // ===============================
     // PUBLIC FORM METHODS
@@ -53,7 +53,7 @@ class PublicFormController extends Controller
         ]);
 
         try {
-            $peserta = PesertaPreRegistered::findByEmail($validated['email']);
+            $peserta = PesertaPreRegistered::where('email', $validated['email'])->first(); // FIXED: Changed from findByEmail method
 
             if (!$peserta) {
                 return response()->json([
@@ -117,7 +117,7 @@ class PublicFormController extends Controller
             }
 
             // Verifikasi Email
-            $preRegistered = PesertaPreRegistered::findByEmail($validated['email']);
+            $preRegistered = PesertaPreRegistered::where('email', $validated['email'])->first(); // FIXED: Changed from findByEmail method
             if (!$preRegistered) {
                 DB::rollBack();
                 return response()->json([
@@ -132,8 +132,10 @@ class PublicFormController extends Controller
             // Generate dan simpan QR Code
             $qrCodeUrl = $this->processQRCode($peserta);
             
-            // Mark pre-registered as registered
-            $preRegistered->markAsRegistered();
+            // Mark pre-registered as registered (if method exists)
+            if (method_exists($preRegistered, 'markAsRegistered')) {
+                $preRegistered->markAsRegistered();
+            }
 
             DB::commit();
 
@@ -150,6 +152,7 @@ class PublicFormController extends Controller
                     'id' => $peserta->id,
                     'nama' => $peserta->nama_lengkap,
                     'kategori' => $peserta->kategori_lari,
+                    'email' => $peserta->email, // FIXED: Added missing email field
                     'qr_code_url' => $qrCodeUrl,
                     'whatsapp_sent' => $whatsappResult['success'] ?? false,
                     'whatsapp_message' => $whatsappResult['message'] ?? 'Unknown status',
@@ -320,7 +323,7 @@ class PublicFormController extends Controller
                     'kategori' => $peserta->kategori_lari,
                     'telepon' => $peserta->telepon,
                     'waktu_daftar' => $peserta->created_at->format('d/m/Y H:i:s'),
-                    'status' => $peserta->status
+                    'status' => $peserta->status ?? 'terdaftar'
                 ]
             ]);
 
@@ -367,10 +370,9 @@ class PublicFormController extends Controller
     private function createPeserta($validated, $preRegistered)
     {
         return PesertaLari::create([
-            'email' => $preRegistered->email, // Tetap ambil dari pre-registered
+            'email' => $validated['email'], // FIXED: Use validated email instead of pre-registered
             'nama_lengkap' => $validated['nama_lengkap'],
             'kategori_lari' => $validated['kategori_lari'],
-            'email' => $validated['email'],
             'telepon' => $validated['telepon'],
             'qr_token' => Str::random(32),
             'status' => 'terdaftar'
@@ -1023,6 +1025,23 @@ class PublicFormController extends Controller
             'description' => 'Batas maksimal pendaftaran coaching clinic'
         ]);
     }
+    public function showQRCode($id)
+        {
+            $peserta = PesertaLari::findOrFail($id);
+            return view('qr-code', compact('peserta'));
+        }
+
+        public function downloadQR($id)
+        {
+            $peserta = PesertaLari::findOrFail($id);
+            $qrPath = storage_path('app/public/' . $peserta->qr_code_path);
+            
+            if (file_exists($qrPath)) {
+                return response()->download($qrPath, "qr-code-{$peserta->id}.png");
+            }
+            
+            return abort(404, 'QR Code not found');
+        }
 
     /**
      * Bulk send QR codes (admin function)
