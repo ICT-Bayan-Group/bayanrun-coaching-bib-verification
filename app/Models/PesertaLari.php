@@ -13,7 +13,6 @@ class PesertaLari extends Model
     protected $table = 'peserta_laris';
 
     protected $fillable = [
-        'nomor_bib',
         'nama_lengkap',
         'kategori_lari',
         'email',

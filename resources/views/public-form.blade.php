@@ -789,10 +789,6 @@
             <div class="loading-bar"></div>
         </div>
         
-        <div class="progress-container">
-            <div class="progress-bar"></div>
-        </div>
-        
         <div class="loading-text">
             Memuat halaman pendaftaran...
         </div>
@@ -825,7 +821,7 @@
         <div class="email-loading-content">
             <div class="logo-container">
                 <div class="logo-glow-small"></div>
-                <img src="{{ asset('images/bayanrun.png') }}" alt="Bayan Run 2025" class="logo-small object-contain mx-auto">
+                <img src="{{ asset('images/bayanrun.png') }}" alt="Bayan Run 2025" class="logo-medium object-contain mx-auto">
             </div>
             
             <h3 class="email-loading-title text-lg font-bold text-white">
@@ -891,10 +887,6 @@
                 <div class="loading-bar-medium"></div>
                 <div class="loading-bar-medium"></div>
                 <div class="loading-bar-medium"></div>
-            </div>
-            
-            <div class="progress-container-medium">
-                <div class="progress-bar-medium"></div>
             </div>
             
             <div class="loading-text-medium">
@@ -1205,14 +1197,33 @@
             }, 4500);
         });
          // Check registration status function
-        async function checkRegistrationStatus() {
+      async function checkRegistrationStatus() {
             try {
                 const response = await fetch('/check-registration-status');
                 const result = await response.json();
                 
+                const registrationStatus = document.getElementById('registration-status');
+                
                 if (!result.registration_open) {
-                    showMaxAlert();
+                    registrationStatus.classList.remove('hidden');
+                    
+                    // Disable all form inputs
+                    const inputs = document.querySelectorAll('input[type="email"], input[type="text"], input[type="tel"]');
+                    const buttons = document.querySelectorAll('button[type="submit"]');
+                    
+                    inputs.forEach(input => input.disabled = true);
+                    buttons.forEach(btn => btn.disabled = true);
+                    
                     return false;
+                } else {
+                    registrationStatus.classList.add('hidden');
+                    
+                    // Re-enable form inputs (except readonly ones)
+                    const inputs = document.querySelectorAll('input[type="email"]:not([readonly]), input[type="text"]:not([readonly]), input[type="tel"]');
+                    const buttons = document.querySelectorAll('button[type="submit"]');
+                    
+                    inputs.forEach(input => input.disabled = false);
+                    buttons.forEach(btn => btn.disabled = false);
                 }
                 return true;
             } catch (error) {
@@ -1220,6 +1231,7 @@
                 return true; // Allow form to show on error
             }
         }
+
         function showMaxAlert() {
             const maxAlert = document.getElementById('max-registration-alert');
             const registrationStatus = document.getElementById('registration-status');
@@ -1378,61 +1390,125 @@
             }
         });
 
-        // Registration form handler
-        document.getElementById('pendaftaran-form').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            clearErrors();
-            
-            const formData = {
-                 email: document.getElementById('email_readonly').value.trim(),
-                nama_lengkap: document.getElementById('nama_lengkap').value.trim(),
-                kategori_lari: document.getElementById('kategori_lari').value.trim(),
-                telepon: document.getElementById('telepon').value.trim()
-            };
-            
-            if (!validateRegistrationForm(formData)) {
-                return;
+        function showRegistrationLoading() {
+                const overlay = document.getElementById('registration-loading-overlay');
+                overlay.classList.add('show');
+                
+                // Start registration step animation
+                startRegistrationSteps();
             }
 
-            const btnDaftar = document.getElementById('btn-daftar');
-            const btnText = document.getElementById('btn-text');
-            const originalText = btnText.innerHTML;
-            
-            btnDaftar.disabled = true;
-            btnText.innerHTML = '<span class="inline-block mr-2 spin">🚀</span>Mendaftar...';
-
-            try {
-                const response = await fetch('/daftar', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify(formData)
-                });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    showSuccessMessage(result.data);
+            // Hide Registration Loading Overlay
+            function hideRegistrationLoading() {
+                const overlay = document.getElementById('registration-loading-overlay');
+                overlay.classList.remove('show');
+                
+                // Stop registration step animation
+                if (registrationStepInterval) {
+                    clearInterval(registrationStepInterval);
+                    registrationStepInterval = null;
+                }
+            }
+            // Registration steps animation
+                function startRegistrationSteps() {
+                    const steps = ['step1', 'step2', 'step3', 'step4'];
+                    let currentStep = 0;
+                    
+                    // Reset all steps
+                    steps.forEach(stepId => {
+                        const stepElement = document.getElementById(stepId);
+                        stepElement.classList.remove('opacity-100', 'text-green-300');
+                        stepElement.classList.add('opacity-50');
+                        stepElement.querySelector('.step-indicator').textContent = '🔄';
+                    });
+                    registrationStepInterval = setInterval(() => {
+                if (currentStep < steps.length) {
+                    const stepElement = document.getElementById(steps[currentStep]);
+                    stepElement.classList.remove('opacity-50');
+                    stepElement.classList.add('opacity-100', 'text-green-300');
+                    stepElement.querySelector('.step-indicator').textContent = '✅';
+                    currentStep++;
                 } else {
-                    if (response.status === 422 && result.errors) {
-                        showValidationErrors(result.errors);
-                    } else {
-                        alert('Terjadi kesalahan: ' + result.message);
-                    }
+                    clearInterval(registrationStepInterval);
+                    registrationStepInterval = null;
+                }
+            }, 800); // Each step takes 800ms
+        }
+
+
+        // Registration form handler
+       document.getElementById('pendaftaran-form').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                // Check registration status first
+                const canRegister = await checkRegistrationStatus();
+                if (!canRegister) {
+                    return;
+                }
+                
+                clearErrors();
+                
+                const formData = {
+                    email: document.getElementById('email_readonly').value.trim(),
+                    nama_lengkap: document.getElementById('nama_lengkap').value.trim(),
+                    kategori_lari: document.getElementById('kategori_lari').value.trim(),
+                    telepon: document.getElementById('telepon').value.trim()
+                };
+                
+                if (!validateRegistrationForm(formData)) {
+                    return;
                 }
 
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Terjadi kesalahan saat mengirim data. Silakan coba lagi.');
-            } finally {
-                btnDaftar.disabled = false;
-                btnText.innerHTML = originalText;
-            }
-        });
+                const btnDaftar = document.getElementById('btn-daftar');
+                const btnText = document.getElementById('btn-text');
+                const originalText = btnText.innerHTML;
+                
+                // Show registration loading overlay
+                showRegistrationLoading();
+                
+                btnDaftar.disabled = true;
+                btnText.innerHTML = '<span class="inline-block mr-2 spin">🚀</span>Memproses...';
+
+                try {
+                    const response = await fetch('/daftar', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify(formData)
+                    });
+
+                    const result = await response.json();
+
+                    // Add minimum loading time for better UX (allow steps to complete)
+                    await new Promise(resolve => setTimeout(resolve, 4000));
+
+                    if (result.success) {
+                        hideRegistrationLoading();
+                        showSuccessMessage(result.data);
+                    } else {
+                        hideRegistrationLoading();
+                        
+                        if (response.status === 422 && result.errors) {
+                            showValidationErrors(result.errors);
+                        } else if (result.message && result.message.includes('maksimal')) {
+                            showMaxAlert();
+                        } else {
+                            alert('Terjadi kesalahan: ' + result.message);
+                        }
+                    }
+
+                } catch (error) {
+                    console.error('Error:', error);
+                    hideRegistrationLoading();
+                    alert('Terjadi kesalahan saat mengirim data. Silakan coba lagi.');
+                } finally {
+                    btnDaftar.disabled = false;
+                    btnText.innerHTML = originalText;
+                }
+            });
 
         function showRegistrationForm(data) {
             document.getElementById('email-verification').classList.add('hidden');
@@ -1656,6 +1732,32 @@
                 }
             }
         });
+        function hideMaxAlert() {
+            const maxAlert = document.getElementById('max-registration-alert');
+            maxAlert.classList.remove('show');
+            
+            // Reset form to initial state
+            setTimeout(() => {
+                document.getElementById('email-form').reset();
+                document.getElementById('pendaftaran-form').reset();
+                clearErrors();
+                
+                document.getElementById('success-message').classList.add('hidden');
+                document.getElementById('form-pendaftaran').classList.add('hidden');
+                document.getElementById('email-verification').classList.remove('hidden');
+                document.getElementById('registration-status').classList.add('hidden');
+                
+                document.getElementById('qr-preview').classList.add('hidden');
+                currentPesertaData = null;
+                
+                // Re-enable forms
+                document.getElementById('btn-verify').disabled = false;
+                document.getElementById('email').disabled = false;
+                
+                // Re-check registration status
+                checkRegistrationStatus();
+            }, 500);
+        }
 
           // Performance optimization: Preload images
         function preloadImages() {
