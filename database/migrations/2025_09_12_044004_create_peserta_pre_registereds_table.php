@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('peserta_pre_registereds', function (Blueprint $table) {
             $table->id();
             $table->string('nama');
-            $table->string('nomor_bib')->unique();
             $table->string('email');
             $table->string('nomor_telepon');
             $table->string('kategori_lari');
@@ -22,7 +21,7 @@ return new class extends Migration
             $table->timestamps();
 
             // Indexes
-            $table->index('nomor_bib');
+            $table->index('email');
             $table->index('is_registered');
         });
     }

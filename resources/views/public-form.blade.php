@@ -8,7 +8,7 @@
     <link rel="icon" type="ico" href="{{ asset('logo.ico') }}">
     <script src="https://cdn.tailwindcss.com"></script>
 
-   <!-- Google Fonts - Montserrat -->
+    <!-- Google Fonts - Montserrat -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
@@ -24,17 +24,19 @@
             }
         }
     </script>
+    
     <style>
         * {
             font-family: 'Montserrat', sans-serif !important;
         }
+        
         body {
             font-family: 'Montserrat', sans-serif;
             background: linear-gradient(to bottom, #560000ff 0%, #8b0202ff 50%, #021f6eff 50%, #00113fff 100%);
             min-height: 100vh;
         }
 
-        /* Main Preloader Styles */
+        /* ===== PRELOADER STYLES ===== */
         .preloader {
             position: fixed;
             top: 0;
@@ -55,7 +57,7 @@
             opacity: 0;
         }
 
-        /* Thank You Page Preloader */
+        /* ===== THANK YOU PRELOADER ===== */
         .thankyou-preloader {
             position: fixed;
             top: 0;
@@ -77,7 +79,7 @@
             opacity: 1;
         }
 
-        /* Email Verification Loading Overlay */
+        /* ===== EMAIL LOADING OVERLAY ===== */
         .email-loading-overlay {
             position: fixed;
             top: 0;
@@ -117,7 +119,132 @@
             transform: translateY(0) scale(1);
         }
 
-        /* Thank You Content Styles */
+        /* ===== REGISTRATION LOADING OVERLAY ===== */
+        .registration-loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 8889;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.4s ease-in-out, visibility 0.4s ease-in-out;
+        }
+
+        .registration-loading-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .registration-loading-content {
+            background: linear-gradient(135deg, #560000ff 0%, #8b0202ff 30%, #021f6eff 70%, #00113fff 100%);
+            border-radius: 25px;
+            padding: 3.5rem 2.5rem;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+            text-align: center;
+            max-width: 350px;
+            width: 90%;
+            transform: translateY(30px) scale(0.9);
+            transition: transform 0.4s ease-out;
+        }
+
+        .registration-loading-overlay.show .registration-loading-content {
+            transform: translateY(0) scale(1);
+        }
+
+        /* ===== MAX REGISTRATION ALERT ===== */
+        .max-registration-alert {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9990;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;
+        }
+
+        .max-registration-alert.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .max-alert-content {
+            background: linear-gradient(135deg, #dc2626 0%, #991b1b 50%, #7f1d1d 100%);
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            padding: 3rem 2.5rem;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            max-width: 450px;
+            width: 90%;
+            transform: translateY(50px) scale(0.8);
+            transition: transform 0.5s ease-out;
+        }
+
+        .max-registration-alert.show .max-alert-content {
+            transform: translateY(0) scale(1);
+        }
+
+        .max-alert-icon {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            animation: alertPulse 2s ease-in-out infinite;
+        }
+
+        .max-alert-title {
+            color: white;
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .max-alert-message {
+            color: rgba(255, 255, 255, 0.95);
+            font-size: 1.1rem;
+            font-weight: 600;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .max-alert-button {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            font-weight: 700;
+            font-size: 1.1rem;
+            padding: 1rem 2rem;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .max-alert-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        /* ===== CONTENT STYLES ===== */
         .thankyou-content {
             text-align: center;
             max-width: 600px;
@@ -176,35 +303,7 @@
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         }
 
-        .thankyou-sparkles {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-            margin-bottom: 2rem;
-            opacity: 0;
-            animation: sparklesSlideUp 1s ease-out 1.9s forwards;
-        }
-
-        .sparkle {
-            font-size: 2rem;
-            animation: sparkle 2s ease-in-out infinite;
-        }
-
-        .sparkle:nth-child(1) { animation-delay: 0s; }
-        .sparkle:nth-child(2) { animation-delay: 0.5s; }
-        .sparkle:nth-child(3) { animation-delay: 1s; }
-        .sparkle:nth-child(4) { animation-delay: 1.5s; }
-
-        .thankyou-footer {
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 0.9rem;
-            font-weight: 500;
-            opacity: 0;
-            transform: translateY(15px);
-            animation: footerSlideUp 1s ease-out 2.2s forwards;
-        }
-
-        /* Logo Styles */
+        /* ===== LOGO STYLES ===== */
         .logo-container {
             position: relative;
             margin-bottom: 2rem;
@@ -226,6 +325,15 @@
             transform: scale(0.8);
             animation: logoFadeIn 0.5s ease-out forwards;
             filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.3));
+        }
+
+        .logo-medium {
+            width: 80px;
+            height: 80px;
+            opacity: 0;
+            transform: scale(0.8);
+            animation: logoFadeIn 0.5s ease-out forwards;
+            filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.3));
         }
 
         .logo-glow {
@@ -253,6 +361,19 @@
             animation: glowPulse 2s ease-in-out infinite;
         }
 
+        .logo-glow-medium {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: glowPulse 2s ease-in-out infinite;
+        }
+
+        /* ===== TEXT ANIMATION STYLES ===== */
         .title {
             opacity: 0;
             transform: translateY(30px);
@@ -277,7 +398,25 @@
             animation: subtitleFadeIn 0.5s ease-out 0.4s forwards;
         }
 
-        /* Loading Bars */
+        .registration-loading-title {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: titleFadeIn 0.6s ease-out 0.3s forwards;
+        }
+
+        .registration-loading-subtitle {
+            opacity: 0;
+            transform: translateY(15px);
+            animation: subtitleFadeIn 0.6s ease-out 0.6s forwards;
+        }
+
+        .registration-loading-steps {
+            opacity: 0;
+            transform: translateY(10px);
+            animation: subtitleFadeIn 0.5s ease-out 0.9s forwards;
+        }
+
+        /* ===== LOADING BARS ===== */
         .loading-bars {
             display: flex;
             gap: 4px;
@@ -321,7 +460,29 @@
         .loading-bar-small:nth-child(4) { animation-delay: 0.9s, 0.9s; }
         .loading-bar-small:nth-child(5) { animation-delay: 1s, 1s; }
 
-        /* Progress Bar */
+        .loading-bars-medium {
+            display: flex;
+            gap: 4px;
+            margin-top: 1.8rem;
+            justify-content: center;
+        }
+
+        .loading-bar-medium {
+            width: 4px;
+            height: 35px;
+            background: linear-gradient(to top, #ffffff40, #ffffff);
+            border-radius: 2px;
+            opacity: 0;
+            animation: barFadeIn 0.5s ease-out forwards, barPulse 1.8s ease-in-out infinite;
+        }
+
+        .loading-bar-medium:nth-child(1) { animation-delay: 1.2s, 1.2s; }
+        .loading-bar-medium:nth-child(2) { animation-delay: 1.3s, 1.3s; }
+        .loading-bar-medium:nth-child(3) { animation-delay: 1.4s, 1.4s; }
+        .loading-bar-medium:nth-child(4) { animation-delay: 1.5s, 1.5s; }
+        .loading-bar-medium:nth-child(5) { animation-delay: 1.6s, 1.6s; }
+
+        /* ===== PROGRESS BARS ===== */
         .progress-container {
             width: 200px;
             height: 2px;
@@ -361,6 +522,26 @@
             animation: progressFillSmall 2s ease-out 1.4s forwards;
         }
 
+        .progress-container-medium {
+            width: 180px;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 1.5px;
+            margin-top: 2rem;
+            overflow: hidden;
+            opacity: 0;
+            animation: progressFadeIn 0.6s ease-out 1.8s forwards;
+        }
+
+        .progress-bar-medium {
+            height: 100%;
+            background: linear-gradient(90deg, #ffffff, #ffffff80);
+            border-radius: 1.5px;
+            width: 0%;
+            animation: progressFillMedium 3s ease-out 2s forwards;
+        }
+
+        /* ===== LOADING TEXT ===== */
         .loading-text {
             margin-top: 1.5rem;
             color: white;
@@ -381,7 +562,47 @@
             animation: textFadeIn 0.5s ease-out 1.6s forwards;
         }
 
-        /* Animations for Main Preloader */
+        .loading-text-medium {
+            margin-top: 1.2rem;
+            color: white;
+            font-size: 0.85rem;
+            font-weight: 500;
+            opacity: 0;
+            transform: translateY(12px);
+            animation: textFadeIn 0.6s ease-out 2.2s forwards;
+        }
+
+        /* ===== MAIN CONTENT ===== */
+        .main-content {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+
+        .main-content.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ===== STEP INDICATOR ===== */
+        .step-indicator {
+            display: inline-block;
+            margin-right: 0.5rem;
+            animation: stepPulse 2s ease-in-out infinite;
+        }
+
+        /* ===== ANIMATIONS ===== */
+        @keyframes alertPulse {
+            0%, 100% { 
+                transform: scale(1);
+                opacity: 0.9;
+            }
+            50% { 
+                transform: scale(1.1);
+                opacity: 1;
+            }
+        }
+
         @keyframes logoSlideUp {
             to {
                 opacity: 1;
@@ -426,9 +647,11 @@
         }
 
         @keyframes progressFill {
-            to {
-                width: 100%;
-            }
+            to { width: 100%; }
+        }
+
+        @keyframes progressFillMedium {
+            to { width: 100%; }
         }
 
         @keyframes textSlideUp {
@@ -438,7 +661,6 @@
             }
         }
 
-        /* Animations for BIB Loading */
         @keyframes logoFadeIn {
             to {
                 opacity: 1;
@@ -461,9 +683,7 @@
         }
 
         @keyframes barFadeIn {
-            to {
-                opacity: 1;
-            }
+            to { opacity: 1; }
         }
 
         @keyframes barPulse {
@@ -472,15 +692,11 @@
         }
 
         @keyframes progressFadeIn {
-            to {
-                opacity: 1;
-            }
+            to { opacity: 1; }
         }
 
         @keyframes progressFillSmall {
-            to {
-                width: 100%;
-            }
+            to { width: 100%; }
         }
 
         @keyframes textFadeIn {
@@ -490,7 +706,6 @@
             }
         }
 
-        /* Thank You Page Animations */
         @keyframes thankYouSlideUp {
             to {
                 opacity: 1;
@@ -512,59 +727,26 @@
             }
         }
 
-        @keyframes sparklesSlideUp {
-            to {
-                opacity: 1;
-            }
+        @keyframes stepPulse {
+            0%, 100% { opacity: 0.6; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.1); }
         }
 
-        @keyframes footerSlideUp {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes sparkle {
-            0%, 100% { 
-                transform: scale(1) rotate(0deg);
-                opacity: 0.7;
-            }
-            50% { 
-                transform: scale(1.3) rotate(180deg);
-                opacity: 1;
-            }
-        }
-
-        /* Spinning animation for verification icon */
         @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
+            to { transform: rotate(360deg); }
         }
 
         .spin {
             animation: spin 1s linear infinite;
         }
 
-        .main-content {
-            opacity: 0;
-            transform: translateY(30px);
-            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
-        }
-
-        .main-content.show {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        /* Responsive adjustments */
+        /* ===== RESPONSIVE ===== */
         @media (max-width: 640px) {
-            .thankyou-title {
+            .thankyou-title, .max-alert-title {
                 font-size: 2rem;
             }
             
-            .thankyou-message {
+            .thankyou-message, .max-alert-message {
                 font-size: 1rem;
             }
             
@@ -573,8 +755,12 @@
                 height: 100px;
             }
             
-            .thankyou-content {
+            .thankyou-content, .max-alert-content {
                 padding: 1rem;
+            }
+            
+            .max-alert-content {
+                max-width: 320px;
             }
         }
     </style>
@@ -603,10 +789,6 @@
             <div class="loading-bar"></div>
         </div>
         
-        <div class="progress-container">
-            <div class="progress-bar"></div>
-        </div>
-        
         <div class="loading-text">
             Memuat halaman pendaftaran...
         </div>
@@ -617,9 +799,7 @@
         <div class="thankyou-content">
             <img src="{{ asset('images/bayanrun.png') }}" alt="Bayan Run 2025" class="thankyou-logo object-contain">
             
-            <h1 class="thankyou-title">
-                TERIMA KASIH!
-            </h1>
+            <h1 class="thankyou-title">TERIMA KASIH!</h1>
             
             <p class="thankyou-message">
                 Terima kasih telah melakukan registrasi<br>
@@ -660,9 +840,77 @@
                 <div class="loading-bar-small"></div>
             </div>
             
+            <div class="progress-container-small">
+                <div class="progress-bar-small"></div>
+            </div>
+            
             <div class="loading-text-small">
                 Validasi data peserta...
             </div>
+        </div>
+    </div>
+
+    <!-- Registration Loading Overlay -->
+    <div id="registration-loading-overlay" class="registration-loading-overlay">
+        <div class="registration-loading-content">
+            <div class="logo-container">
+                <div class="logo-glow-medium"></div>
+                <img src="{{ asset('images/bayanrun.png') }}" alt="Bayan Run 2025" class="logo-medium object-contain mx-auto">
+            </div>
+            
+            <h3 class="registration-loading-title text-xl font-bold text-white">
+                Memproses Pendaftaran
+            </h3>
+            
+            <p class="registration-loading-subtitle text-white text-sm font-medium mt-2">
+                Tunggu sebentar, kami sedang memproses data Anda...
+            </p>
+            
+            <div class="registration-loading-steps text-white text-xs mt-3 space-y-1">
+                <div id="step1" class="opacity-50">
+                    <span class="step-indicator">🔄</span>Menyimpan data peserta...
+                </div>
+                <div id="step2" class="opacity-50">
+                    <span class="step-indicator">📱</span>Membuat QR Code...
+                </div>
+                <div id="step3" class="opacity-50">
+                    <span class="step-indicator">💬</span>Mengirim WhatsApp...
+                </div>
+                <div id="step4" class="opacity-50">
+                    <span class="step-indicator">✅</span>Menyelesaikan registrasi...
+                </div>
+            </div>
+            
+            <div class="loading-bars-medium">
+                <div class="loading-bar-medium"></div>
+                <div class="loading-bar-medium"></div>
+                <div class="loading-bar-medium"></div>
+                <div class="loading-bar-medium"></div>
+                <div class="loading-bar-medium"></div>
+            </div>
+            
+            <div class="loading-text-medium">
+                Proses ini memerlukan beberapa detik...
+            </div>
+        </div>
+    </div>
+
+    <!-- MAX Registration Alert -->
+    <div id="max-registration-alert" class="max-registration-alert">
+        <div class="max-alert-content">
+            <div class="max-alert-icon">🚫</div>
+            
+            <h2 class="max-alert-title">PENDAFTARAN DITUTUP</h2>
+            
+            <div class="max-alert-message">
+                <strong>Mohon Maaf!</strong><br><br>
+                Pendaftaran Coaching Clinic Bayan Run 2025 telah <strong>DITUTUP</strong> karena sudah mencapai batas maksimal <strong>600 peserta</strong>.<br><br>
+                Terima kasih atas antusiasme Anda.
+            </div>
+            
+            <button onclick="hideMaxAlert()" class="max-alert-button">
+                Mengerti, Tutup
+            </button>
         </div>
     </div>
 
@@ -671,13 +919,30 @@
         <div class="max-w-2xl mx-auto px-4 sm:px-6">
             <!-- Header dengan Logo -->
             <div class="text-center mb-8 sm:mb-10">
-               <img src="{{ asset('images/bayanrun.png') }}" 
-                    alt="Bayan Run 2025" 
-                    class="mx-auto w-34 h-36 sm:w-34 sm:h-36 object-contain">
+                <img src="{{ asset('images/bayanrun.png') }}" 
+                     alt="Bayan Run 2025" 
+                     class="mx-auto w-34 h-36 sm:w-34 sm:h-36 object-contain">
                 <h1 class="mt-4 sm:mt-5 text-2xl sm:text-3xl font-extrabold text-white italic tracking-wide drop-shadow-sm">
                     COACHING CLINIC REGISTRATION
                 </h1>
                 <p class="text-white font-bold mt-1 sm:mt-2 text-sm sm:text-xl uppercase">BAYAN RUN 2025</p>
+                
+                <!-- Registration Status Alert -->
+                <div id="registration-status" class="mt-4 hidden">
+                    <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-r-lg mx-auto max-w-md">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <span class="text-red-500 text-lg">🚫</span>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm font-bold">
+                                    <strong>Pendaftaran Ditutup!</strong><br>
+                                    Batas maksimal 600 peserta telah tercapai.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Email Verification Form -->
@@ -691,16 +956,16 @@
                     <div>
                         <label class="block font-medium text-gray-700 mb-2">
                             <span class="flex items-center font-semibold">
-                                <span class="inline-block mr-2">🏃‍♂️</span>
+                                <span class="inline-block mr-2">📧</span>
                                 Email *
                             </span>
                         </label>
-                        <input type="text" 
+                        <input type="email" 
                                id="email" 
                                required 
                                class="font-semibold w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
-                               placeholder="Masukkan nomor Email Anda">
-                       <div class="text-red-500 text-sm mt-1 font-extrabold hidden" id="error-nomor_email"></div>
+                               placeholder="Masukkan email Anda">
+                        <div class="text-red-500 text-sm mt-1 font-extrabold hidden" id="error-email"></div>
                     </div>
                     
                     <!-- Info Section -->
@@ -712,7 +977,7 @@
                             <div class="ml-3">
                                 <p class="text-sm text-blue-800 font-semibold">
                                     <strong>Informasi:</strong><br>
-                                    Masukkan nomor Email sesuai dengan yang tercantum pada email undangan Anda untuk melanjutkan proses pendaftaran.
+                                    Masukkan email sesuai dengan yang tercantum pada email undangan Anda untuk melanjutkan proses pendaftaran.
                                 </p>
                             </div>
                         </div>
@@ -720,7 +985,7 @@
 
                     <button type="submit" 
                             id="btn-verify" 
-                            class="w-full bg-blue-700 hover:from-red-800 hover:to-red-600 text-white font-semibold py-4 rounded-lg transition-all duration-300 transform hover:scale-105 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:transform-none">
+                            class="w-full bg-blue-700 hover:bg-blue-800 text-white font-semibold py-4 rounded-lg transition-all duration-300 transform hover:scale-105 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:transform-none">
                         <span id="btn-verify-text">
                             <span class="inline-block mr-2">🔍</span>
                             Verifikasi Email
@@ -755,11 +1020,11 @@
                     <div>
                         <label class="block font-medium text-gray-700 mb-2">
                             <span class="flex items-center font-semibold">
-                                <span class="inline-block mr-2">🎫</span>
+                                <span class="inline-block mr-2">📧</span>
                                 Email *
                             </span>
                         </label>
-                        <input type="text" 
+                        <input type="email" 
                                id="email_readonly" 
                                readonly 
                                class="font-semibold w-full border border-gray-300 rounded-lg p-3 bg-gray-100 cursor-not-allowed" 
@@ -804,15 +1069,15 @@
                                 Nomor Telepon *
                             </span>
                         </label>
-                        <input type="text" 
+                        <input type="tel" 
                                id="telepon" 
                                required 
-                               class=" font-semibold w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
+                               class="font-semibold w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
                                placeholder="08xxxxxxxxxx">
                         <div class="text-red-500 font-extrabold text-sm mt-1 hidden" id="error-telepon"></div>
                         <div class="text-blue-600 text-sm mt-1">Anda dapat mengubah nomor telepon jika diperlukan</div>
                         <p class="text-sm text-gray-600 mt-1 font-semibold">
-                            <span class="inline-block mr-1 ">💬</span>
+                            <span class="inline-block mr-1">💬</span>
                             Nomor WhatsApp aktif untuk menerima konfirmasi pendaftaran
                         </p>
                     </div>
@@ -834,10 +1099,10 @@
 
                     <button type="submit" 
                             id="btn-daftar" 
-                            class="w-full bg-blue-700 hover:from-red-800 hover:to-red-600 text-white font-semibold py-4 rounded-lg transition-all duration-300 transform hover:scale-105 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:transform-none">
+                            class="w-full bg-blue-700 hover:bg-blue-800 text-white font-semibold py-4 rounded-lg transition-all duration-300 transform hover:scale-105 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:transform-none">
                         <span id="btn-text">
                             <span class="inline-block mr-2">🚀</span>
-                            Daftar 
+                            Daftar Sekarang
                         </span>
                     </button>
                 </form>
@@ -848,7 +1113,7 @@
                 <div class="text-green-600 text-6xl mb-4">✅</div>
                 <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-4">Pendaftaran Berhasil!</h2>
                 <p class="text-gray-600 mb-6 text-sm sm:text-base font-semibold">
-                   Hasil pendaftaran beserta QR Code registrasi akan menjadi bukti resmi untuk memasuki area acara saat hari pelaksanaan.
+                    Hasil pendaftaran beserta QR Code registrasi akan menjadi bukti resmi untuk memasuki area acara saat hari pelaksanaan.
                     Mohon simpan dan tunjukkan QR Code Anda di pintu masuk.
                 </p>
                 
@@ -859,10 +1124,6 @@
                         Detail Pendaftaran
                     </h3>
                     <div class="grid gap-2 text-sm">
-                        <!--<div class="flex justify-between">
-                            <span class="font-medium">BIB:</span>
-                            <span id="success-bib"></span>
-                        </div>-->
                         <div class="flex justify-between">
                             <span class="font-medium">Nama:</span>
                             <span id="success-nama"></span>
@@ -871,7 +1132,6 @@
                             <span class="font-medium">Kategori Lari:</span>
                             <span id="success-kategori"></span>
                         </div>
-                   
                         <div class="flex justify-between">
                             <span class="font-medium">Email:</span>
                             <span id="success-email"></span>
@@ -904,11 +1164,10 @@
                 
                 <button onclick="showThankYou()" 
                         id="btn-reset"
-                        class="w-full sm:w-auto bg-yellow-500 to-red-500 hover:from-blue-700 hover:to-red-600 text-white font-semibold py-3 px-8 rounded-lg transition-all duration-300 transform hover:scale-105">
+                        class="w-full sm:w-auto bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-3 px-8 rounded-lg transition-all duration-300 transform hover:scale-105">
                     Selesai
                 </button>
             </div>
-
         </div>
 
         <!-- Footer -->
@@ -919,9 +1178,12 @@
 
     <script>
         let currentPesertaData = null;
+        let registrationStepInterval = null;
 
         // Preloader functionality
         window.addEventListener('load', function() {
+            checkRegistrationStatus();
+
             setTimeout(function() {
                 const preloader = document.getElementById('preloader');
                 const mainContent = document.getElementById('main-content');
@@ -934,6 +1196,65 @@
                 }, 800);
             }, 4500);
         });
+         // Check registration status function
+      async function checkRegistrationStatus() {
+            try {
+                const response = await fetch('/check-registration-status');
+                const result = await response.json();
+                
+                const registrationStatus = document.getElementById('registration-status');
+                
+                if (!result.registration_open) {
+                    registrationStatus.classList.remove('hidden');
+                    
+                    // Disable all form inputs
+                    const inputs = document.querySelectorAll('input[type="email"], input[type="text"], input[type="tel"]');
+                    const buttons = document.querySelectorAll('button[type="submit"]');
+                    
+                    inputs.forEach(input => input.disabled = true);
+                    buttons.forEach(btn => btn.disabled = true);
+                    
+                    return false;
+                } else {
+                    registrationStatus.classList.add('hidden');
+                    
+                    // Re-enable form inputs (except readonly ones)
+                    const inputs = document.querySelectorAll('input[type="email"]:not([readonly]), input[type="text"]:not([readonly]), input[type="tel"]');
+                    const buttons = document.querySelectorAll('button[type="submit"]');
+                    
+                    inputs.forEach(input => input.disabled = false);
+                    buttons.forEach(btn => btn.disabled = false);
+                }
+                return true;
+            } catch (error) {
+                console.error('Error checking registration status:', error);
+                return true; // Allow form to show on error
+            }
+        }
+
+        function showMaxAlert() {
+            const maxAlert = document.getElementById('max-registration-alert');
+            const registrationStatus = document.getElementById('registration-status');
+            
+            maxAlert.classList.add('show');
+            registrationStatus.classList.remove('hidden');
+            
+            // Disable forms
+            document.getElementById('success-message').classList.add('hidden');
+            document.getElementById('form-pendaftaran').classList.add('hidden');
+            document.getElementById('email-verification').classList.remove('hidden');
+            document.getElementById('registration-status').classList.add('hidden');
+            
+            document.getElementById('qr-preview').classList.add('hidden');
+            currentPesertaData = null;
+            
+            // Re-enable forms
+            document.getElementById('btn-verify').disabled = false;
+            document.getElementById('email').disabled = false;
+            
+            // Re-check registration status
+            checkRegistrationStatus();
+        }
 
         // Show Thank You Page
         function showThankYou() {
@@ -1069,61 +1390,125 @@
             }
         });
 
-        // Registration form handler
-        document.getElementById('pendaftaran-form').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            clearErrors();
-            
-            const formData = {
-                 email: document.getElementById('email_readonly').value.trim(),
-                nama_lengkap: document.getElementById('nama_lengkap').value.trim(),
-                kategori_lari: document.getElementById('kategori_lari').value.trim(),
-                telepon: document.getElementById('telepon').value.trim()
-            };
-            
-            if (!validateRegistrationForm(formData)) {
-                return;
+        function showRegistrationLoading() {
+                const overlay = document.getElementById('registration-loading-overlay');
+                overlay.classList.add('show');
+                
+                // Start registration step animation
+                startRegistrationSteps();
             }
 
-            const btnDaftar = document.getElementById('btn-daftar');
-            const btnText = document.getElementById('btn-text');
-            const originalText = btnText.innerHTML;
-            
-            btnDaftar.disabled = true;
-            btnText.innerHTML = '<span class="inline-block mr-2 spin">🚀</span>Mendaftar...';
-
-            try {
-                const response = await fetch('/daftar', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify(formData)
-                });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    showSuccessMessage(result.data);
+            // Hide Registration Loading Overlay
+            function hideRegistrationLoading() {
+                const overlay = document.getElementById('registration-loading-overlay');
+                overlay.classList.remove('show');
+                
+                // Stop registration step animation
+                if (registrationStepInterval) {
+                    clearInterval(registrationStepInterval);
+                    registrationStepInterval = null;
+                }
+            }
+            // Registration steps animation
+                function startRegistrationSteps() {
+                    const steps = ['step1', 'step2', 'step3', 'step4'];
+                    let currentStep = 0;
+                    
+                    // Reset all steps
+                    steps.forEach(stepId => {
+                        const stepElement = document.getElementById(stepId);
+                        stepElement.classList.remove('opacity-100', 'text-green-300');
+                        stepElement.classList.add('opacity-50');
+                        stepElement.querySelector('.step-indicator').textContent = '🔄';
+                    });
+                    registrationStepInterval = setInterval(() => {
+                if (currentStep < steps.length) {
+                    const stepElement = document.getElementById(steps[currentStep]);
+                    stepElement.classList.remove('opacity-50');
+                    stepElement.classList.add('opacity-100', 'text-green-300');
+                    stepElement.querySelector('.step-indicator').textContent = '✅';
+                    currentStep++;
                 } else {
-                    if (response.status === 422 && result.errors) {
-                        showValidationErrors(result.errors);
-                    } else {
-                        alert('Terjadi kesalahan: ' + result.message);
-                    }
+                    clearInterval(registrationStepInterval);
+                    registrationStepInterval = null;
+                }
+            }, 800); // Each step takes 800ms
+        }
+
+
+        // Registration form handler
+       document.getElementById('pendaftaran-form').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                // Check registration status first
+                const canRegister = await checkRegistrationStatus();
+                if (!canRegister) {
+                    return;
+                }
+                
+                clearErrors();
+                
+                const formData = {
+                    email: document.getElementById('email_readonly').value.trim(),
+                    nama_lengkap: document.getElementById('nama_lengkap').value.trim(),
+                    kategori_lari: document.getElementById('kategori_lari').value.trim(),
+                    telepon: document.getElementById('telepon').value.trim()
+                };
+                
+                if (!validateRegistrationForm(formData)) {
+                    return;
                 }
 
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Terjadi kesalahan saat mengirim data. Silakan coba lagi.');
-            } finally {
-                btnDaftar.disabled = false;
-                btnText.innerHTML = originalText;
-            }
-        });
+                const btnDaftar = document.getElementById('btn-daftar');
+                const btnText = document.getElementById('btn-text');
+                const originalText = btnText.innerHTML;
+                
+                // Show registration loading overlay
+                showRegistrationLoading();
+                
+                btnDaftar.disabled = true;
+                btnText.innerHTML = '<span class="inline-block mr-2 spin">🚀</span>Memproses...';
+
+                try {
+                    const response = await fetch('/daftar', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify(formData)
+                    });
+
+                    const result = await response.json();
+
+                    // Add minimum loading time for better UX (allow steps to complete)
+                    await new Promise(resolve => setTimeout(resolve, 4000));
+
+                    if (result.success) {
+                        hideRegistrationLoading();
+                        showSuccessMessage(result.data);
+                    } else {
+                        hideRegistrationLoading();
+                        
+                        if (response.status === 422 && result.errors) {
+                            showValidationErrors(result.errors);
+                        } else if (result.message && result.message.includes('maksimal')) {
+                            showMaxAlert();
+                        } else {
+                            alert('Terjadi kesalahan: ' + result.message);
+                        }
+                    }
+
+                } catch (error) {
+                    console.error('Error:', error);
+                    hideRegistrationLoading();
+                    alert('Terjadi kesalahan saat mengirim data. Silakan coba lagi.');
+                } finally {
+                    btnDaftar.disabled = false;
+                    btnText.innerHTML = originalText;
+                }
+            });
 
         function showRegistrationForm(data) {
             document.getElementById('email-verification').classList.add('hidden');
@@ -1239,6 +1624,11 @@
         document.getElementById('telepon').addEventListener('input', function() {
             let value = this.value.replace(/\D/g, '');
             
+            // Limit to reasonable phone number length
+            if (value.length > 15) {
+                value = value.substring(0, 15);
+            }
+            
             if (value.startsWith('62')) {
                 // Already has country code
             } else if (value.startsWith('0')) {
@@ -1251,23 +1641,27 @@
             this.value = value;
         });
 
-        // Real-time validation feedback
+      // Real-time validation feedback
         document.querySelectorAll('input[required]').forEach(input => {
             input.addEventListener('blur', function() {
-                if (this.readonly) return;
+                if (this.readonly || this.disabled) return;
                 
                 const field = this.id;
                 const value = this.value.trim();
                 
+                // Clear existing errors first
                 if (this.classList.contains('border-red-500')) {
                     document.getElementById('error-' + field).classList.add('hidden');
                     this.classList.remove('border-red-500');
                 }
                 
+                // Validate specific fields
                 if (!value && field !== 'email_readonly' && field !== 'nama_lengkap' && field !== 'kategori_lari') {
                     showError(field, 'Field ini harus diisi');
-                } else if (field === 'email' && value && !isValidEmail(value)) {
+                } else if ((field === 'email' || field === 'email_readonly') && value && !isValidEmail(value)) {
                     showError(field, 'Format email tidak valid');
+                } else if (field === 'telepon' && value && value.length < 10) {
+                    showError(field, 'Nomor telepon minimal 10 digit');
                 }
             });
             
@@ -1278,7 +1672,200 @@
                 }
             });
         });
+        // Prevent double-click on buttons with improved debouncing
+        function debounceButton(button, delay = 2000) {
+            button.addEventListener('click', function() {
+                this.style.pointerEvents = 'none';
+                setTimeout(() => {
+                    this.style.pointerEvents = 'auto';
+                }, delay);
+            });
+        }
 
+        debounceButton(document.getElementById('btn-verify'), 1500);
+        debounceButton(document.getElementById('btn-daftar'), 3000);
+        debounceButton(document.getElementById('btn-reset'), 1000);
+
+          // Enhanced form validation
+        function enhancedValidation() {
+            const emailInput = document.getElementById('email');
+            const teleponInput = document.getElementById('telepon');
+            
+            emailInput.addEventListener('input', function() {
+                const email = this.value.trim();
+                if (email && !isValidEmail(email)) {
+                    this.classList.add('border-yellow-300');
+                } else {
+                    this.classList.remove('border-yellow-300');
+                }
+            });
+            
+            teleponInput.addEventListener('input', function() {
+                const telepon = this.value.trim();
+                if (telepon && telepon.length < 10) {
+                    this.classList.add('border-yellow-300');
+                } else {
+                    this.classList.remove('border-yellow-300');
+                }
+            });
+        }
+           document.addEventListener('DOMContentLoaded', enhancedValidation);
+            // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // ESC key to close max alert
+            if (e.key === 'Escape') {
+                const maxAlert = document.getElementById('max-registration-alert');
+                if (maxAlert.classList.contains('show')) {
+                    hideMaxAlert();
+                }
+            }
+            
+            // Enter key optimization for forms
+            if (e.key === 'Enter' && e.target.tagName === 'INPUT') {
+                const form = e.target.closest('form');
+                if (form) {
+                    const submitButton = form.querySelector('button[type="submit"]');
+                    if (submitButton && !submitButton.disabled) {
+                        e.preventDefault();
+                        submitButton.click();
+                    }
+                }
+            }
+        });
+        function hideMaxAlert() {
+            const maxAlert = document.getElementById('max-registration-alert');
+            maxAlert.classList.remove('show');
+            
+            // Reset form to initial state
+            setTimeout(() => {
+                document.getElementById('email-form').reset();
+                document.getElementById('pendaftaran-form').reset();
+                clearErrors();
+                
+                document.getElementById('success-message').classList.add('hidden');
+                document.getElementById('form-pendaftaran').classList.add('hidden');
+                document.getElementById('email-verification').classList.remove('hidden');
+                document.getElementById('registration-status').classList.add('hidden');
+                
+                document.getElementById('qr-preview').classList.add('hidden');
+                currentPesertaData = null;
+                
+                // Re-enable forms
+                document.getElementById('btn-verify').disabled = false;
+                document.getElementById('email').disabled = false;
+                
+                // Re-check registration status
+                checkRegistrationStatus();
+            }, 500);
+        }
+
+          // Performance optimization: Preload images
+        function preloadImages() {
+            const images = [
+                '{{ asset("images/bayanrun.png") }}'
+            ];
+            
+            images.forEach(src => {
+                const img = new Image();
+                img.src = src;
+            });
+        }
+
+        // Call preload on page load
+        window.addEventListener('load', preloadImages);
+
+          // Network status monitoring
+        function monitorNetworkStatus() {
+            window.addEventListener('online', function() {
+                console.log('Network connection restored');
+                // Re-enable forms if they were disabled due to network issues
+                checkRegistrationStatus();
+            });
+
+            window.addEventListener('offline', function() {
+                console.log('Network connection lost');
+                // Show user-friendly message about network issues
+                const forms = document.querySelectorAll('form');
+                forms.forEach(form => {
+                    const buttons = form.querySelectorAll('button');
+                    buttons.forEach(btn => {
+                        if (!btn.dataset.originalText) {
+                            btn.dataset.originalText = btn.innerHTML;
+                        }
+                        btn.innerHTML = '<span class="inline-block mr-2">📶</span>Koneksi Terputus';
+                        btn.disabled = true;
+                    });
+                });
+            });
+        }
+
+        // Initialize network monitoring
+        monitorNetworkStatus();
+         // Auto-retry mechanism for failed requests
+        async function fetchWithRetry(url, options, maxRetries = 3) {
+            let lastError;
+            
+            for (let i = 0; i < maxRetries; i++) {
+                try {
+                    const response = await fetch(url, options);
+                    if (response.ok) {
+                        return response;
+                    }
+                    lastError = new Error(`HTTP ${response.status}: ${response.statusText}`);
+                } catch (error) {
+                    lastError = error;
+                    // Wait before retry
+                    if (i < maxRetries - 1) {
+                        await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+                    }
+                }
+            }
+            
+            throw lastError;
+        }
+
+         // Improved error handling with user-friendly messages
+        function handleApiError(error, context = '') {
+            console.error(`API Error${context ? ` (${context})` : ''}:`, error);
+            
+            let message = 'Terjadi kesalahan yang tidak terduga. Silakan coba lagi.';
+            
+            if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                message = 'Koneksi internet bermasalah. Periksa koneksi Anda dan coba lagi.';
+            } else if (error.message.includes('timeout')) {
+                message = 'Permintaan memakan waktu terlalu lama. Silakan coba lagi.';
+            } else if (error.message.includes('400')) {
+                message = 'Data yang dikirim tidak valid. Periksa kembali form Anda.';
+            } else if (error.message.includes('500')) {
+                message = 'Server mengalami gangguan. Silakan coba beberapa saat lagi.';
+            }
+            
+            return message;
+        }
+
+           // Enhanced loading states
+        function setLoadingState(element, isLoading, loadingText = 'Loading...') {
+            if (isLoading) {
+                element.dataset.originalText = element.innerHTML;
+                element.innerHTML = loadingText;
+                element.disabled = true;
+            } else {
+                element.innerHTML = element.dataset.originalText || element.innerHTML;
+                element.disabled = false;
+            }
+        }
+        // Smooth scrolling enhancement
+        function smoothScrollTo(element, offset = 0) {
+            const elementPosition = element.offsetTop - offset;
+            window.scrollTo({
+                top: elementPosition,
+                behavior: 'smooth'
+            });
+        }
+        // Initialize all enhancements
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Bayan Run 2025 Registration Form - Clean Version Loaded');
+        });
         // Prevent double-click on buttons
         document.getElementById('btn-verify').addEventListener('click', function() {
             this.style.pointerEvents = 'none';
