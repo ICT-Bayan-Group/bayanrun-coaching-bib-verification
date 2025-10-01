@@ -210,7 +210,7 @@ class PublicFormController extends Controller
     private function generateQRCodeURL($data)
     {
         $encodedData = urlencode($data);
-        return "https://api.qrserver.com/v1/create-qr-code/?size=300x300&format=png&data={$encodedData}";
+        return "https://api.qrserver.com/v1/create-qr-code/?size=300x300&format=png&margin=20&data={$encodedData}";
     }
 
     /**
