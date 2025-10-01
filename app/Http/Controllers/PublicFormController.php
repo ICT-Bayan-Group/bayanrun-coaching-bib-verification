@@ -750,8 +750,9 @@ class PublicFormController extends Controller
                "• Simpan QR Code dengan baik\n" .
                "• Tunjukkan QR Code saat check-in event\n" .
                "• QR ini adalah tiket masuk Anda\n\n" .
-               "📊 Status Pendaftaran: {$remainingSlots} slot tersisa dari 600\n\n" .
-               "🎯 Info detail coaching clinic akan dikirimkan menjelang event.\n\n" .
+               "📅 Tanggal Coaching Clinic: 11 Oktober 2025\n" .
+               "🕒 Waktu: 15:00 - 17:00 WITA\n" .
+               "📍 Lokasi: Gedung Kesenian Balikpapan, Kalimantan Timur, Indonesia\n\n" .
                "Terima kasih telah bergabung! Sampai jumpa di coaching clinic! 🏃‍♂️🏃‍♀️\n\n" .
                "Salam Olahraga,\n" .
                "Tim Bayan Run 2025 🏃‍♂️✨";
@@ -764,7 +765,7 @@ class PublicFormController extends Controller
     {
         return "🎫 QR CODE COACHING CLINIC BAYAN RUN 2025\n\n" .
                "Halo {$peserta->nama_lengkap}! 👋\n\n" .
-               "Ini adalah QR Code pendaftaran Anda:\n" .
+               "Ini adalah QR Code pendaftaran Coaching Clinic Bayan Run 2025 Anda:\n" .
                "🏃‍♂️ Kategori: {$peserta->kategori_lari}\n\n" .
                "🔒 SIMPAN QR CODE INI DENGAN BAIK!\n" .
                "Ini adalah tiket masuk Anda ke coaching clinic.\n\n" .
