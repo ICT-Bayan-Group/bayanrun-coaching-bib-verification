@@ -32,7 +32,7 @@
         
         body {
             font-family: 'Montserrat', sans-serif;
-            background: linear-gradient(to bottom, #560000ff 0%, #8b0202ff 50%, #021f6eff 50%, #00113fff 100%);
+            background: linear-gradient(to bottom, #ffffffff 0%, #d9d9d9ff 50%, #021f6eff 50%, #00113fff 100%);
             min-height: 100vh;
         }
 
@@ -43,7 +43,7 @@
             left: 0;
             width: 100%;
             height: 100vh;
-            background: linear-gradient(135deg, #560000ff 0%, #8b0202ff 30%, #021f6eff 70%, #00113fff 100%);
+            background: linear-gradient(135deg, #d9d9d9ff 0%, #d9d9d9ff 30%, #021f6eff 70%, #00113fff 100%);
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -64,7 +64,7 @@
             left: 0;
             width: 100%;
             height: 100vh;
-            background: linear-gradient(135deg, #560000ff 0%, #8b0202ff 30%, #021f6eff 70%, #00113fff 100%);
+            background: linear-gradient(135deg, #d9d9d9ff 0%, #d9d9d9ff 30%, #021f6eff 70%, #00113fff 100%);
             display: none;
             flex-direction: column;
             justify-content: center;
@@ -104,7 +104,7 @@
         }
 
         .email-loading-content {
-            background: linear-gradient(135deg, #560000ff 0%, #8b0202ff 30%, #021f6eff 70%, #00113fff 100%);
+            background: linear-gradient(135deg, #d9d9d9ff 0%, #d9d9d9ff 30%, #021f6eff 70%, #00113fff 100%);
             border-radius: 20px;
             padding: 3rem 2rem;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
@@ -144,7 +144,7 @@
         }
 
         .registration-loading-content {
-            background: linear-gradient(135deg, #560000ff 0%, #8b0202ff 30%, #021f6eff 70%, #00113fff 100%);
+            background: linear-gradient(135deg, #d9d9d9ff 0%, #d9d9d9ff 30%, #021f6eff 70%, #00113fff 100%);
             border-radius: 25px;
             padding: 3.5rem 2.5rem;
             box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
@@ -319,8 +319,8 @@
         }
 
         .logo-small {
-            width: 60px;
-            height: 60px;
+            width: 100px;
+            height: 100px;
             opacity: 0;
             transform: scale(0.8);
             animation: logoFadeIn 0.5s ease-out forwards;
@@ -770,7 +770,7 @@
     <div id="preloader" class="preloader">
         <div class="logo-container">
             <div class="logo-glow"></div>
-            <img src="{{ asset('images/bayanrun.png') }}" alt="Bayan Run 2025" class="logo object-contain">
+            <img src="{{ asset('images/bayanrun.png') }}" alt="Bayan Run 2025" class="mx-auto w-34 h-36 sm:w-34 sm:h-36 object-contain">
         </div>
         
         <h1 class="title text-4xl sm:text-5xl font-extrabold text-white italic tracking-wide text-center">
@@ -797,7 +797,7 @@
     <!-- Thank You Preloader -->
     <div id="thankyou-preloader" class="thankyou-preloader">
         <div class="thankyou-content">
-            <img src="{{ asset('images/bayanrun.png') }}" alt="Bayan Run 2025" class="thankyou-logo object-contain">
+            <img src="{{ asset('images/bayanrun.png') }}" alt="Bayan Run 2025" class="mx-auto w-34 h-36 sm:w-34 sm:h-36 object-contain">
             
             <h1 class="thankyou-title">TERIMA KASIH!</h1>
             
@@ -821,7 +821,7 @@
         <div class="email-loading-content">
             <div class="logo-container">
                 <div class="logo-glow-small"></div>
-                <img src="{{ asset('images/bayanrun.png') }}" alt="Bayan Run 2025" class="logo-medium object-contain mx-auto">
+                <img src="{{ asset('images/bayanrun.png') }}" alt="Bayan Run 2025" class="mx-auto w-34 h-36 sm:w-34 sm:h-36 object-contain">
             </div>
             
             <h3 class="email-loading-title text-lg font-bold text-white">
@@ -855,7 +855,7 @@
         <div class="registration-loading-content">
             <div class="logo-container">
                 <div class="logo-glow-medium"></div>
-                <img src="{{ asset('images/bayanrun.png') }}" alt="Bayan Run 2025" class="logo-medium object-contain mx-auto">
+                <img src="{{ asset('images/bayanrun.png') }}" alt="Bayan Run 2025" class="mx-auto w-34 h-36 sm:w-34 sm:h-36 object-contain">
             </div>
             
             <h3 class="registration-loading-title text-xl font-bold text-white">
@@ -922,10 +922,10 @@
                 <img src="{{ asset('images/bayanrun.png') }}" 
                      alt="Bayan Run 2025" 
                      class="mx-auto w-34 h-36 sm:w-34 sm:h-36 object-contain">
-                <h1 class="mt-4 sm:mt-5 text-2xl sm:text-3xl font-extrabold text-white italic tracking-wide drop-shadow-sm">
+                <h1 class="mt-4 sm:mt-5 text-2xl sm:text-3xl font-extrabold text-blue-900 italic tracking-wide drop-shadow-sm">
                     COACHING CLINIC REGISTRATION
                 </h1>
-                <p class="text-white font-bold mt-1 sm:mt-2 text-sm sm:text-xl uppercase">BAYAN RUN 2025</p>
+                <p class="text-red-800 font-extrabold mt-1 sm:mt-2 text-sm sm:text-xl uppercase">BAYAN RUN 2025</p>
                 
                 <!-- Registration Status Alert -->
                 <div id="registration-status" class="mt-4 hidden">
@@ -1148,7 +1148,7 @@
                         <div class="ml-3">
                             <p class="text-sm text-green-700">
                                 <strong>Cek WhatsApp Anda!</strong><br>
-                                Kami telah mengirimkan konfirmasi pendaftaran dan QR Code bukti registrasi ke nomor WhatsApp Anda.
+                                Kami telah mengirimkan konfirmasi pendaftaran dan QR Code bukti registrasi coaching clinic ke nomor WhatsApp Anda.
                             </p>
                         </div>
                     </div>
