@@ -104,7 +104,7 @@
         }
 
         .email-loading-content {
-            background: linear-gradient(135deg, #d9d9d9ff 0%, #d9d9d9ff 30%, #021f6eff 70%, #00113fff 100%);
+            background: linear-gradient(135deg, #021f6eff 0%, #00113fff 30%, #021f6eff 70%, #00113fff 100%);
             border-radius: 20px;
             padding: 3rem 2rem;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
@@ -144,7 +144,7 @@
         }
 
         .registration-loading-content {
-            background: linear-gradient(135deg, #d9d9d9ff 0%, #d9d9d9ff 30%, #021f6eff 70%, #00113fff 100%);
+            background: linear-gradient(135deg, #021f6eff 0%, #00113fff 30%, #021f6eff 70%, #00113fff 100%);
             border-radius: 25px;
             padding: 3.5rem 2.5rem;
             box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
@@ -183,14 +183,14 @@
             visibility: visible;
         }
 
-        .max-alert-content {
-            background: linear-gradient(135deg, #dc2626 0%, #991b1b 50%, #7f1d1d 100%);
-            border: 3px solid rgba(255, 255, 255, 0.2);
-            border-radius: 25px;
+             .max-alert-content {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 50%, #991b1b 100%);
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-radius: 30px;
             padding: 3rem 2.5rem;
             box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
             text-align: center;
-            max-width: 450px;
+            max-width: 480px;
             width: 90%;
             transform: translateY(50px) scale(0.8);
             transition: transform 0.5s ease-out;
@@ -977,7 +977,7 @@
                             <div class="ml-3">
                                 <p class="text-sm text-blue-800 font-semibold">
                                     <strong>Informasi:</strong><br>
-                                    Masukkan email sesuai dengan yang tercantum pada email undangan Anda untuk melanjutkan proses pendaftaran.
+                                     Gunakan alamat email yang sama saat registrasi Bayan Run 2025.
                                 </p>
                             </div>
                         </div>
@@ -1205,6 +1205,7 @@
                 const registrationStatus = document.getElementById('registration-status');
                 
                 if (!result.registration_open) {
+                    showMaxAlert();
                     registrationStatus.classList.remove('hidden');
                     
                     // Disable all form inputs
