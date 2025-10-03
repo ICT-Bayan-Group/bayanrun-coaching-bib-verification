@@ -13,7 +13,7 @@ use Illuminate\Support\Str;
 class PublicFormController extends Controller
 {
     // Maximum allowed registrations
-    private const MAX_REGISTRATIONS = 601; // FIXED: Changed from 3 to 600
+    private const MAX_REGISTRATIONS = 590; // FIXED: Changed from 3 to 600
 
     // ===============================
     // PUBLIC FORM METHODS
