@@ -33234,6 +33234,12 @@ class PesertaPreRegisteredSeeder extends Seeder
         'nomor_telepon' => '85377640809',
         'kategori_lari' => '10 K',
     ],
+    [
+        'nama' => 'TEST USER George',
+        'email' => 'testusergeorge@example.com',
+        'nomor_telepon' => '85377640809',
+        'kategori_lari' => '5 K',
+    ]
 ];
 
         // Insert data with timestamps

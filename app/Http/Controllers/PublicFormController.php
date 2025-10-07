@@ -767,6 +767,7 @@ class PublicFormController extends Controller
                "Halo {$peserta->nama_lengkap}! 👋\n\n" .
                "Ini adalah QR Code pendaftaran Coaching Clinic Bayan Run 2025 Anda:\n" .
                "🏃‍♂️ Kategori: {$peserta->kategori_lari}\n\n" .
+                "📧 Email: {$peserta->email}\n" .
                "🔒 SIMPAN QR CODE INI DENGAN BAIK!\n" .
                "Ini adalah tiket masuk Anda ke coaching clinic.\n\n" .
                "Detail lengkap akan dikirim pada pesan berikutnya... 📩";
