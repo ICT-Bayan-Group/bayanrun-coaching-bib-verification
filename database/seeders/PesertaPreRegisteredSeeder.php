@@ -33239,7 +33239,7 @@ class PesertaPreRegisteredSeeder extends Seeder
         'email' => 'testusergeorge@example.com',
         'nomor_telepon' => '85377640809',
         'kategori_lari' => '5 K',
-    ]
+    ],
 ];
 
         // Insert data with timestamps

@@ -453,88 +453,76 @@ class PublicFormController extends Controller
     /**
      * Send WhatsApp notification dengan urutan baru: QR Code dahulu, kemudian message
      */
-    private function sendWhatsAppNotificationNewOrder($peserta, $qrCodeUrl)
-    {
-        try {
-            $config = $this->getWhatsAppConfig();
-            if (!$config['valid']) {
-                return ['success' => false, 'message' => 'WhatsApp configuration not found'];
-            }
-
-            $phoneNumber = $this->formatPhoneNumber($peserta->telepon);
-            
-            Log::info('Starting WhatsApp notification (QR first)', [
-                'peserta_id' => $peserta->id,
-                'phone' => $phoneNumber,
-                'nama' => $peserta->nama_lengkap
-            ]);
-
-            // Validate QR Code URL
-            if (!$this->validateQRCodeUrl($qrCodeUrl)) {
-                Log::error('QR Code URL validation failed', [
-                    'peserta_id' => $peserta->id,
-                    'qr_url' => $qrCodeUrl
-                ]);
-                return ['success' => false, 'message' => 'QR Code URL tidak valid'];
-            }
-
-            // STEP 1: Send QR Code image first
-            $imageResult = $this->sendWhatsAppImage($phoneNumber, $qrCodeUrl, $peserta);
-            
-            if (!$imageResult['success']) {
-                Log::warning('QR Code image failed, trying fallback', [
-                    'peserta_id' => $peserta->id
-                ]);
-                // Try fallback but continue with text message
-            }
-
-            // Wait before sending text message
-            sleep(5);
-
-            // STEP 2: Send text message after QR Code
-            $textResult = $this->sendWhatsAppTextAfterQR($phoneNumber, $peserta);
-
-            return [
-                'success' => $imageResult['success'] && $textResult['success'],
-                'message' => $this->formatWhatsAppResult($imageResult, $textResult),
-                'image_success' => $imageResult['success'],
-                'text_success' => $textResult['success'],
-                'order' => 'qr_first_then_message'
-            ];
-
-        } catch (\Exception $e) {
-            Log::error('WhatsApp notification error (new order)', [
-                'peserta_id' => $peserta->id,
-                'error' => $e->getMessage()
-            ]);
-
-            return [
-                'success' => false,
-                'message' => 'Exception occurred: ' . $e->getMessage()
-            ];
+   private function sendWhatsAppNotificationNewOrder($peserta, $qrCodeUrl)
+{
+    try {
+        $config = $this->getWhatsAppConfig();
+        if (!$config['valid']) {
+            return ['success' => false, 'message' => 'WhatsApp configuration not found'];
         }
-    }
 
-    /**
-     * Format WhatsApp result message
-     */
-    private function formatWhatsAppResult($imageResult, $textResult)
-    {
-        if ($imageResult['success'] && $textResult['success']) {
-            return 'QR Code dan pesan coaching clinic berhasil dikirim';
-        } elseif ($imageResult['success'] && !$textResult['success']) {
-            return 'QR Code berhasil dikirim, pesan coaching clinic gagal: ' . $textResult['message'];
-        } elseif (!$imageResult['success'] && $textResult['success']) {
-            return 'Pesan coaching clinic berhasil dikirim, QR Code gagal: ' . $imageResult['message'];
-        } else {
-            return 'QR Code dan pesan coaching clinic gagal dikirim';
+        $phoneNumber = $this->formatPhoneNumber($peserta->telepon);
+        
+        Log::info('Starting WhatsApp notification (QR Code only)', [
+            'peserta_id' => $peserta->id,
+            'phone' => $phoneNumber,
+            'nama' => $peserta->nama_lengkap
+        ]);
+
+        // Validate QR Code URL
+        if (!$this->validateQRCodeUrl($qrCodeUrl)) {
+            Log::error('QR Code URL validation failed', [
+                'peserta_id' => $peserta->id,
+                'qr_url' => $qrCodeUrl
+            ]);
+            return ['success' => false, 'message' => 'QR Code URL tidak valid'];
         }
+
+        // Send QR Code image with caption
+        $imageResult = $this->sendWhatsAppImage($phoneNumber, $qrCodeUrl, $peserta);
+        
+        if (!$imageResult['success']) {
+            Log::warning('QR Code image failed, trying fallback', [
+                'peserta_id' => $peserta->id
+            ]);
+        }
+
+        return [
+            'success' => $imageResult['success'],
+            'message' => $imageResult['message'],
+            'image_success' => $imageResult['success'],
+            'order' => 'qr_only'
+        ];
+
+    } catch (\Exception $e) {
+        Log::error('WhatsApp notification error (QR only)', [
+            'peserta_id' => $peserta->id,
+            'error' => $e->getMessage()
+        ]);
+
+        return [
+            'success' => false,
+            'message' => 'Exception occurred: ' . $e->getMessage()
+        ];
     }
+}
+
+        /**
+         * Format WhatsApp result message
+         */
+        private function formatWhatsAppResult($imageResult, $textResult = null)
+        {
+            if ($imageResult['success']) {
+                return 'QR Code berhasil dikirim';
+            } else {
+                return 'QR Code gagal dikirim: ' . $imageResult['message'];
+            }
+        }
 
     /**
      * Send WhatsApp text message after QR Code
      */
-    private function sendWhatsAppTextAfterQR($phoneNumber, $peserta, $maxRetries = 3)
+   /* private function sendWhatsAppTextAfterQR($phoneNumber, $peserta, $maxRetries = 3)
     {
         $config = $this->getWhatsAppConfig();
         $message = $this->prepareCoachingClinicSuccessMessage($peserta);
@@ -592,135 +580,134 @@ class PublicFormController extends Controller
             'success' => false,
             'message' => "Failed to send coaching clinic success message after {$maxRetries} attempts"
         ];
-    }
+    }*/
 
     /**
-     * Send WhatsApp image with retry and fallback
-     */
-    private function sendWhatsAppImage($phoneNumber, $qrCodeUrl, $peserta, $maxRetries = 5)
-    {
-        $config = $this->getWhatsAppConfig();
-        
-        if (empty($config['image_url'])) {
-            Log::error('WhatsApp image URL not configured', ['peserta_id' => $peserta->id]);
-            return ['success' => false, 'message' => 'Image URL not configured'];
-        }
-
-        $caption = $this->prepareQRCodeCaption($peserta);
-
-        for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
-            try {
-                Log::info("WhatsApp image attempt {$attempt}", [
-                    'peserta_id' => $peserta->id,
-                    'phone' => $phoneNumber
-                ]);
-
-                // Progressive delay
-                if ($attempt > 1) {
-                    $delay = $attempt * 2;
-                    Log::info("Waiting {$delay} seconds before retry", [
-                        'peserta_id' => $peserta->id,
-                        'attempt' => $attempt
-                    ]);
-                    sleep($delay);
-                }
-
-                $response = Http::timeout(45)
-                    ->withHeaders([
-                        'Authorization' => $config['token'],
-                        'Content-Type' => 'application/json',
-                    ])
-                    ->post($config['image_url'], [
-                        'phone' => $phoneNumber,
-                        'image' => $qrCodeUrl,
-                        'caption' => $caption
-                    ]);
-
-                Log::info("WhatsApp image response attempt {$attempt}", [
-                    'peserta_id' => $peserta->id,
-                    'status_code' => $response->status(),
-                    'successful' => $response->successful()
-                ]);
-
-                if ($response->successful()) {
-                    $responseData = $response->json();
-                    if (isset($responseData['status']) && $responseData['status'] === true) {
-                        Log::info('WhatsApp image sent successfully', [
-                            'peserta_id' => $peserta->id,
-                            'attempts' => $attempt
-                        ]);
-                        
-                        return [
-                            'success' => true,
-                            'message' => 'QR Code image sent successfully',
-                            'attempts' => $attempt
-                        ];
-                    }
-                }
-
-            } catch (\Exception $e) {
-                Log::error("WhatsApp image attempt {$attempt} failed", [
-                    'peserta_id' => $peserta->id,
-                    'error' => $e->getMessage()
-                ]);
-            }
-        }
-
-        // All attempts failed, try fallback
-        Log::error('All WhatsApp image attempts failed, trying fallback', [
-            'peserta_id' => $peserta->id,
-            'total_attempts' => $maxRetries
-        ]);
-
-        return $this->sendQRCodeFallback($phoneNumber, $peserta);
+ * Send WhatsApp image with retry and fallback
+ */
+private function sendWhatsAppImage($phoneNumber, $qrCodeUrl, $peserta, $maxRetries = 5)
+{
+    $config = $this->getWhatsAppConfig();
+    
+    if (empty($config['image_url'])) {
+        Log::error('WhatsApp image URL not configured', ['peserta_id' => $peserta->id]);
+        return ['success' => false, 'message' => 'Image URL not configured'];
     }
 
-    /**
-     * Send QR Code data as text fallback
-     */
-    private function sendQRCodeFallback($phoneNumber, $peserta)
-    {
+    $caption = $this->prepareQRCodeCaption($peserta);
+
+    for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
         try {
-            $config = $this->getWhatsAppConfig();
-            $fallbackMessage = $this->prepareFallbackMessage($peserta);
+            Log::info("WhatsApp image attempt {$attempt}", [
+                'peserta_id' => $peserta->id,
+                'phone' => $phoneNumber
+            ]);
 
-            $response = Http::timeout(30)
+            // Progressive delay
+            if ($attempt > 1) {
+                $delay = $attempt * 2;
+                Log::info("Waiting {$delay} seconds before retry", [
+                    'peserta_id' => $peserta->id,
+                    'attempt' => $attempt
+                ]);
+                sleep($delay);
+            }
+
+            $response = Http::timeout(45)
                 ->withHeaders([
                     'Authorization' => $config['token'],
                     'Content-Type' => 'application/json',
                 ])
-                ->post($config['url'], [
+                ->post($config['image_url'], [
                     'phone' => $phoneNumber,
-                    'message' => $fallbackMessage,
-                    'isGroup' => false
+                    'image' => $qrCodeUrl,
+                    'caption' => $caption
                 ]);
 
-            Log::info('QR Code fallback message sent', [
+            Log::info("WhatsApp image response attempt {$attempt}", [
                 'peserta_id' => $peserta->id,
+                'status_code' => $response->status(),
                 'successful' => $response->successful()
             ]);
 
-            return [
-                'success' => $response->successful(),
-                'message' => $response->successful() 
-                    ? 'Fallback QR Code data sent as text'
-                    : 'Both image and fallback failed',
-                'fallback_used' => true
-            ];
+            if ($response->successful()) {
+                $responseData = $response->json();
+                if (isset($responseData['status']) && $responseData['status'] === true) {
+                    Log::info('WhatsApp image sent successfully', [
+                        'peserta_id' => $peserta->id,
+                        'attempts' => $attempt
+                    ]);
+                    
+                    return [
+                        'success' => true,
+                        'message' => 'QR Code image sent successfully',
+                        'attempts' => $attempt
+                    ];
+                }
+            }
 
         } catch (\Exception $e) {
-            Log::error('QR Code fallback failed', [
+            Log::error("WhatsApp image attempt {$attempt} failed", [
                 'peserta_id' => $peserta->id,
                 'error' => $e->getMessage()
             ]);
-            
-            return [
-                'success' => false,
-                'message' => 'Both QR Code image and fallback failed',
-                'fallback_used' => true
-            ];
         }
     }
+
+    // All attempts failed, try fallback
+    Log::error('All WhatsApp image attempts failed, trying fallback', [
+        'peserta_id' => $peserta->id,
+        'total_attempts' => $maxRetries
+    ]);
+
+    return $this->sendQRCodeFallback($phoneNumber, $peserta);
+}
+    /**
+ * Send QR Code data as text fallback
+ */
+private function sendQRCodeFallback($phoneNumber, $peserta)
+{
+    try {
+        $config = $this->getWhatsAppConfig();
+        $fallbackMessage = $this->prepareFallbackMessage($peserta);
+
+        $response = Http::timeout(30)
+            ->withHeaders([
+                'Authorization' => $config['token'],
+                'Content-Type' => 'application/json',
+            ])
+            ->post($config['url'], [
+                'phone' => $phoneNumber,
+                'message' => $fallbackMessage,
+                'isGroup' => false
+            ]);
+
+        Log::info('QR Code fallback message sent', [
+            'peserta_id' => $peserta->id,
+            'successful' => $response->successful()
+        ]);
+
+        return [
+            'success' => $response->successful(),
+            'message' => $response->successful() 
+                ? 'Fallback QR Code data sent as text'
+                : 'Both image and fallback failed',
+            'fallback_used' => true
+        ];
+
+    } catch (\Exception $e) {
+        Log::error('QR Code fallback failed', [
+            'peserta_id' => $peserta->id,
+            'error' => $e->getMessage()
+        ]);
+        
+        return [
+            'success' => false,
+            'message' => 'Both QR Code image and fallback failed',
+            'fallback_used' => true
+        ];
+    }
+}
 
     // ===============================
     // MESSAGE PREPARATION METHODS - UPDATED
@@ -728,8 +715,9 @@ class PublicFormController extends Controller
 
     /**
      * Prepare coaching clinic success message (sent after QR Code)
+
      */
-    private function prepareCoachingClinicSuccessMessage($peserta)
+   /* private function prepareCoachingClinicSuccessMessage($peserta)
     {
         $remainingSlots = self::MAX_REGISTRATIONS - PesertaLari::count();
         $registrationNumber = PesertaLari::count();
@@ -756,44 +744,63 @@ class PublicFormController extends Controller
                "Terima kasih telah bergabung! Sampai jumpa di coaching clinic! 🏃‍♂️🏃‍♀️\n\n" .
                "Salam Olahraga,\n" .
                "Tim Bayan Run 2025 🏃‍♂️✨";
-    }
+    }  */
 
-    /**
-     * Prepare QR Code caption (sent first)
-     */
-    private function prepareQRCodeCaption($peserta)
-    {
-        return "🎫 QR CODE COACHING CLINIC BAYAN RUN 2025\n\n" .
-               "Halo {$peserta->nama_lengkap}! 👋\n\n" .
-               "Ini adalah QR Code pendaftaran Coaching Clinic Bayan Run 2025 Anda:\n" .
-               "🏃‍♂️ Kategori: {$peserta->kategori_lari}\n\n" .
-                "📧 Email: {$peserta->email}\n" .
-               "🔒 SIMPAN QR CODE INI DENGAN BAIK!\n" .
-               "Ini adalah tiket masuk Anda ke coaching clinic.\n\n" .
-               "Detail lengkap akan dikirim pada pesan berikutnya... 📩";
-    }
+ /**
+ * Prepare QR Code caption with complete information
+ */
+private function prepareQRCodeCaption($peserta)
+{
+    $registrationNumber = PesertaLari::where('created_at', '<=', $peserta->created_at)->count();
+    
+    return "🎫 QR CODE COACHING CLINIC BAYAN RUN 2025\n\n" .
+           "Halo {$peserta->nama_lengkap}! 👋\n\n" .
+           "Pendaftaran Anda di Coaching Clinic Bayan Run 2025 telah berhasil! 🏃‍♂️✨\n\n" .
+           "Ini adalah QR Code pendaftaran Coaching Clinic Bayan Run 2025 Anda:\n\n" .
+           "📋 DETAIL PENDAFTARAN:\n" .
+           "━━━━━━━━━━━━━━━━━━━━━━━━━\n" .
+           "👤 Nama: {$peserta->nama_lengkap}\n" .
+           "🏃‍♂️ Kategori: {$peserta->kategori_lari}\n" .
+           "📧 Email: {$peserta->email}\n" .
+           "📱 No. HP: {$peserta->telepon}\n" .
+           "🔢 Peserta ke: {$registrationNumber}/600\n" .
+           "━━━━━━━━━━━━━━━━━━━━━━━━━\n\n" .
+           "⚠️ PENTING:\n" .
+           "• Simpan QR Code dengan baik\n" .
+           "• Tunjukkan QR Code saat check-in event\n" .
+           "• QR ini adalah tiket masuk Anda\n\n" .
+           "📅 Tanggal Coaching Clinic: 11 Oktober 2025\n" .
+           "🕒 Waktu: 15:00 - 17:00 WITA\n" .
+           "📍 Lokasi: Gedung Kesenian Balikpapan, Kalimantan Timur, Indonesia\n\n" .
+           "🔒 SIMPAN QR CODE INI DENGAN BAIK!\n" .
+           "Ini adalah tiket masuk Anda ke coaching clinic.\n\n" .
+           "Terima kasih telah bergabung! Sampai jumpa di coaching clinic! 🏃‍♂️🏃‍♀️\n\n" .
+           "Salam Olahraga,\n" .
+           "Tim Bayan Run 2025 🏃‍♂️✨";
+}
 
-    /**
-     * Prepare fallback message - MENGGUNAKAN EMAIL
-     */
-    private function prepareFallbackMessage($peserta)
-    {
-        return "🚨 QR CODE FALLBACK - COACHING CLINIC BAYAN RUN 2025 🚨\n\n" .
-               "Halo {$peserta->nama_lengkap}! 👋\n\n" .
-               "Maaf, terjadi kendala teknis dalam mengirim QR Code sebagai gambar.\n\n" .
-               "📋 DATA VERIFIKASI ANDA:\n" .
-               "━━━━━━━━━━━━━━━━━━━━━━━━━\n" .
-               "👤 Nama: {$peserta->nama_lengkap}\n" .
-               "🏆 Kategori: {$peserta->kategori_lari}\n" .
-               "📧 Email: {$peserta->email}\n" .
-               "━━━━━━━━━━━━━━━━━━━━━━━━━\n\n" .
-               "📱 Link verifikasi:\n" .
-               "https://coaching.bayanevent.com/verify?email=" . urlencode($peserta->email) . "#" . str_replace(' ', '_', $peserta->nama_lengkap) . "\n\n" .
-               "📱 Anda dapat menggunakan link di atas untuk verifikasi.\n\n" .
-               "🔄 QR Code gambar akan dikirim ulang secepatnya.\n\n" .
-               "Detail coaching clinic akan dikirim pada pesan berikutnya...";
-    }
-
+   /**
+ * Prepare fallback message
+ */
+private function prepareFallbackMessage($peserta)
+{
+    return "🚨 QR CODE FALLBACK - COACHING CLINIC BAYAN RUN 2025 🚨\n\n" .
+           "Halo {$peserta->nama_lengkap}! 👋\n\n" .
+           "Maaf, terjadi kendala teknis dalam mengirim QR Code sebagai gambar.\n\n" .
+           "📋 DATA VERIFIKASI ANDA:\n" .
+           "━━━━━━━━━━━━━━━━━━━━━━━━━\n" .
+           "👤 Nama: {$peserta->nama_lengkap}\n" .
+           "🏆 Kategori: {$peserta->kategori_lari}\n" .
+           "📧 Email: {$peserta->email}\n" .
+           "━━━━━━━━━━━━━━━━━━━━━━━━━\n\n" .
+           "📱 Link verifikasi:\n" .
+           "https://coaching.bayanevent.com/verify?email=" . urlencode($peserta->email) . "#" . str_replace(' ', '_', $peserta->nama_lengkap) . "\n\n" .
+           "📱 Anda dapat menggunakan link di atas untuk verifikasi.\n\n" .
+           "🔄 QR Code gambar akan dikirim ulang secepatnya.\n\n" .
+           "📅 Tanggal: 11 Oktober 2025\n" .
+           "🕒 Waktu: 15:00 - 17:00 WITA\n" .
+           "📍 Lokasi: Gedung Kesenian Balikpapan";
+}
     // ===============================
     // ADMIN & API METHODS
     // ===============================
