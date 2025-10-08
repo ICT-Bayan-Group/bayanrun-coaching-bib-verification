@@ -873,7 +873,7 @@
                 <div id="step2" class="opacity-50">
                     <span class="step-indicator">📱</span>Membuat QR Code...
                 </div>
-                <div id="step3" class="opacity-50">
+                   <div id="step3" class="opacity-50">
                     <span class="step-indicator">💬</span>Mengirim WhatsApp...
                 </div>
                 <div id="step4" class="opacity-50">
@@ -1076,10 +1076,10 @@
                                placeholder="08xxxxxxxxxx">
                         <div class="text-red-500 font-extrabold text-sm mt-1 hidden" id="error-telepon"></div>
                         <div class="text-blue-600 text-sm mt-1">Anda dapat mengubah nomor telepon jika diperlukan</div>
-                        <p class="text-sm text-gray-600 mt-1 font-semibold">
+                       <!-- <p class="text-sm text-gray-600 mt-1 font-semibold">
                             <span class="inline-block mr-1">💬</span>
                             Nomor WhatsApp aktif untuk menerima konfirmasi pendaftaran
-                        </p>
+                        </p>-->
                     </div>
 
                     <!-- Info Section -->
@@ -1091,7 +1091,7 @@
                             <div class="ml-3">
                                 <p class="text-sm text-yellow-800 font-semibold">
                                     <strong>Informasi:</strong><br>
-                                    Setelah pendaftaran berhasil, Anda akan menerima konfirmasi dan QR Code melalui WhatsApp sebagai bukti registrasi.
+                                    Setelah pendaftaran berhasil, Silahkan mengcapture atau screenshot hasil registrasi beserta qr code sebagai bukti resmi untuk memasuki area acara saat hari pelaksanaan.
                                 </p>
                             </div>
                         </div>
@@ -1139,20 +1139,20 @@
                     </div>
                 </div>
 
-                <!-- WhatsApp Info -->
-                <div class="bg-green-50 border-l-4 border-green-400 p-4 mb-6 text-left">
-                    <div class="flex">
-                        <div class="flex-shrink-0">
-                            <span class="text-green-400 text-xl">💬</span>
-                        </div>
-                        <div class="ml-3">
-                            <p class="text-sm text-green-700">
-                                <strong>Cek WhatsApp Anda!</strong><br>
-                                Kami telah mengirimkan konfirmasi pendaftaran dan QR Code bukti registrasi coaching clinic ke nomor WhatsApp Anda.
-                            </p>
-                        </div>
+               <!-- Registration Info -->
+            <div class="bg-green-50 border-l-4 border-green-400 p-4 mb-6 text-left">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <span class="text-green-400 text-xl">💬</span>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-green-700">
+                            <strong>Silakan capture atau screenshot hasil pendaftaran ini!</strong><br>
+                            Simpan sebagai bukti registrasi coaching clinic Anda.
+                        </p>
                     </div>
                 </div>
+            </div>
                 
                 <!-- QR Code Preview -->
                 <div id="qr-preview" class="mb-6 hidden">
