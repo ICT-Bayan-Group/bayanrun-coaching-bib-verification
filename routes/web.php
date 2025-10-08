@@ -35,12 +35,12 @@ Route::post('/retry-qr/{pesertaId}', [PublicFormController::class, 'retryQRCode'
 // Route::get('/registration-status', [PublicFormController::class, 'checkRegistrationStatus'])->name('registration.status');
 
 // Admin Routes - Dashboard & Management
-Route::prefix('admin')->name('admin.')->group(function () {
-    Route::get('/', [PublicFormController::class, 'showRegistrations'])->name('dashboard');
-    Route::get('/dashboard', [PublicFormController::class, 'showRegistrations'])->name('registrations.index');
-    Route::get('/peserta', [PublicFormController::class, 'showRegistrations'])->name('peserta.index');
-    Route::get('/peserta/{id}', [PublicFormController::class, 'showDetail'])->name('peserta.detail');
-    Route::get('/export', [PublicFormController::class, 'export'])->name('export');
+//Route::prefix('admin')->name('admin.')->group(function () {
+ //   Route::get('/', [PublicFormController::class, 'showRegistrations'])->name('dashboard');
+ //   Route::get('/dashboard', [PublicFormController::class, 'showRegistrations'])->name('registrations.index');
+  //  Route::get('/peserta', [PublicFormController::class, 'showRegistrations'])->name('peserta.index');
+  //  Route::get('/peserta/{id}', [PublicFormController::class, 'showDetail'])->name('peserta.detail');
+   // Route::get('/export', [PublicFormController::class, 'export'])->name('export');
     
     // Regenerate QR Route
     Route::post('/peserta/{id}/regenerate-qr', [PublicFormController::class, 'regenerateQR'])->name('regenerate.qr');
