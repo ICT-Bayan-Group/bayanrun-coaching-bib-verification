@@ -24,6 +24,36 @@ return [
         'image_url' => env('WABLAS_IMAGE_URL', 'https://sby.wablas.com/api/send-image'),
     ],
 
+     /*
+    |--------------------------------------------------------------------------
+    | Mekari Qontak WhatsApp Service Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Configuration for Mekari Qontak WhatsApp Business API
+    | Documentation: https://docs.qontak.com
+    |
+    */
+    'qontak' => [
+        // API Base URL
+        'url' => env('QONTAK_API_URL', 'https://service-chat.qontak.com/api/open/v1/broadcasts/whatsapp/direct'),
+        
+        // Bearer Token untuk autentikasi
+        'token' => env('QONTAK_TOKEN'),
+        
+        // Channel Integration ID dari dashboard Qontak
+        'channel_integration_id' => env('QONTAK_CHANNEL_INTEGRATION_ID'),
+        
+        // Template ID (opsional - untuk menggunakan message template)
+        'template_id' => env('QONTAK_TEMPLATE_ID', ''),
+        
+        // Timeout settings (dalam detik)
+        'timeout' => env('QONTAK_TIMEOUT', 45),
+        
+        // Retry settings
+        'max_retries' => env('QONTAK_MAX_RETRIES', 3),
+        'retry_delay' => env('QONTAK_RETRY_DELAY', 2), // detik
+    ],
+
     'resend' => [
         'key' => env('RESEND_KEY'),
     ],
