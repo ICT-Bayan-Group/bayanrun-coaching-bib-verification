@@ -12,6 +12,8 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         //
+       $this->app->singleton(QRCodeService::class);
+        $this->app->singleton(WhatsAppService::class);
     }
 
     /**

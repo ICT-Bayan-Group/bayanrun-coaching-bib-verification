@@ -1583,21 +1583,76 @@
             });
         }
 
-        function showSuccessMessage(data) {
+       function showSuccessMessage(data) {
             document.getElementById('form-pendaftaran').classList.add('hidden');
             document.getElementById('success-message').classList.remove('hidden');
 
             document.getElementById('success-email').textContent = data.email;
             document.getElementById('success-nama').textContent = data.nama;
             document.getElementById('success-kategori').textContent = data.kategori;
-            document.getElementById('success-email').textContent = document.getElementById('email').value;
             
+            // Display QR Code
             if (data.qr_code_url) {
                 document.getElementById('qr-image').src = data.qr_code_url;
                 document.getElementById('qr-preview').classList.remove('hidden');
             }
             
+            // Display WhatsApp Status
+            displayWhatsAppStatus(data);
+            
             window.scrollTo(0, 0);
+        }
+
+        function displayWhatsAppStatus(data) {
+            // Check if WhatsApp info container exists, if not create it
+            let whatsappInfo = document.getElementById('whatsapp-info');
+            
+            if (!whatsappInfo) {
+                whatsappInfo = document.createElement('div');
+                whatsappInfo.id = 'whatsapp-info';
+                whatsappInfo.className = 'mb-6';
+                
+                // Insert after peserta-info
+                const pesertaInfo = document.getElementById('peserta-info');
+                pesertaInfo.parentNode.insertBefore(whatsappInfo, pesertaInfo.nextSibling);
+            }
+            
+            if (data.whatsapp_sent) {
+                // Success message
+                whatsappInfo.innerHTML = `
+                    <div class="bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg text-left">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <span class="text-green-400 text-xl">✅</span>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-green-700 font-semibold">
+                                    <strong>QR Code Berhasil Dikirim ke WhatsApp!</strong><br>
+                                    ${data.whatsapp_message || 'QR Code telah dikirim ke nomor WhatsApp Anda.'}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                // Warning message - QR still valid even if WhatsApp failed
+                whatsappInfo.innerHTML = `
+                    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r-lg text-left">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <span class="text-yellow-400 text-xl">⚠️</span>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-yellow-700 font-semibold">
+                                    <strong>Pendaftaran Berhasil!</strong><br>
+                                    Namun pengiriman WhatsApp mengalami kendala: ${data.whatsapp_message || 'Silakan simpan QR Code di atas.'}<br>
+                                    <strong>QR Code Anda tetap valid dan dapat digunakan.</strong>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
         }
 
         function resetForm() {

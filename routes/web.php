@@ -24,8 +24,8 @@ Route::get('/check-registration-status', [PublicFormController::class, 'checkReg
 Route::get('/verify', [PublicFormController::class, 'verifyQR'])->name('qr.verify.email');
 Route::post('/verify', [PublicFormController::class, 'verifyQR'])->name('qr.verify.email.post');
 
-// WhatsApp Test Route
-Route::get('/test-whatsapp', [PublicFormController::class, 'testWhatsApp'])->name('test.whatsapp');
+// Test WhatsApp (GET & POST)
+Route::get('/test-whatsapp', [PublicFormController::class, 'testWhatsApp'])->name('test.whatsapp.get');
 Route::post('/test-whatsapp', [PublicFormController::class, 'testWhatsApp'])->name('test.whatsapp.post');
 
 // QR Code Retry Route
